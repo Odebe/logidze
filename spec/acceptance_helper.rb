@@ -4,6 +4,8 @@ require "spec_helper"
 
 require "digest/sha1"
 
+require_relative '../lib/logidze/utils/db_selection'
+
 # For faster development, let's not re-create a database for every test run,
 # only if Logidze SQL has changed
 #
@@ -19,10 +21,7 @@ module ConditionalDatabaseReset
     end
 
     def watched_files_patterns
-      [
-        File.join(__dir__, "..", "lib/generators/logidze/install/functions/*.sql"),
-        File.join(__dir__, "..", "lib/generators/logidze/install/templates/*")
-      ]
+      Logidze::Utils::DbSelection::Adapter.watched_files_patterns
     end
 
     def stale?
