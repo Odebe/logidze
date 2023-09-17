@@ -1,0 +1,8 @@
+test:
+  adapter: mysql2
+  encoding: utf8
+  url: <%= ENV['DATABASE_URL'] %>
+  host: <%= URI(ENV['DATABASE_URL']).host %>
+  port: <%= URI(ENV['DATABASE_URL']).port %>
+  pool: 5
+  database: logidze_test

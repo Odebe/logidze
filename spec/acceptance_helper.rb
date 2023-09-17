@@ -64,6 +64,13 @@ RSpec.configure do |config|
 
   config.before(:suite) do
     Dir.chdir("#{File.dirname(__FILE__)}/dummy") do
+      ::FileUtils.rm("db/database.yml", force: true)
+
+      FileUtils.cp(
+        "config/database.#{Logidze::Utils::DbSelection.adapter_name}.yml",
+        "config/database.yml"
+      )
+
       if ConditionalDatabaseReset.stale?
         start = Time.now
 

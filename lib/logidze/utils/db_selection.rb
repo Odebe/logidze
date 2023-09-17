@@ -31,6 +31,10 @@ module Logidze
           require_relative "adapters/postgres"
 
           Adapters::Postgres
+        when 'mysql2'
+          require_relative "adapters/mysql"
+
+          Adapters::Mysql
         else
           raise "Not supported database '#{adapter_name}'"
         end

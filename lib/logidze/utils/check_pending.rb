@@ -42,10 +42,10 @@ module Logidze
       end
 
       def needs_migration?
-        (library_function_versions - pg_function_versions).any?
+        (library_function_versions - database_function_versions).any?
       end
 
-      def pg_function_versions
+      def database_function_versions
         Logidze::Utils::FunctionDefinitions.from_db.map { |func| [func.name, func.version] }
       end
 
