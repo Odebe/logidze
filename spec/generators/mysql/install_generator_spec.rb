@@ -57,17 +57,6 @@ describe Logidze::Generators::InstallGenerator, type: :generator, database: :mys
     end
   end
 
-  # xdescribe "hstore migration" do
-  #   subject { migration_file("db/migrate/enable_hstore.rb") }
-  #
-  #   it "creates migration", :aggregate_failures do
-  #     run_generator(args)
-  #
-  #     is_expected.to exist
-  #     is_expected.to contain "ActiveRecord::Migration[#{ar_version}]"
-  #   end
-  # end
-
   xcontext "update migration" do
     let(:version) { Logidze::VERSION.delete(".") }
     let(:base_args) { ["--update"] }

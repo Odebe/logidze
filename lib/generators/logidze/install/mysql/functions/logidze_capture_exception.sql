@@ -1,11 +1,7 @@
 DELIMITER $$
-
-CREATE PROCEDURE logidze_capture_exception(
-    IN error_data JSON
-)
--- version: 1
+DROP PROCEDURE IF EXISTS logidze_capture_exception$$
+CREATE PROCEDURE logidze_capture_exception(IN error_data JSON)
 BEGIN
-    -- TODO
+-- version: 1
 END$$
-
 DELIMITER ;

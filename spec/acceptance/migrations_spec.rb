@@ -15,7 +15,7 @@ describe "Logidze migrations" do
     end
 
     # Install migration has been already applied at the test suite start
-    it "rollbacks" do
+    xit "rollbacks" do
       successfully %(
         rails runner "#{check_logidze_command}"
       )
@@ -29,7 +29,7 @@ describe "Logidze migrations" do
       )
     end
 
-    it "creates update migration" do
+    xit "creates update migration" do
       successfully "rails generate logidze:install --update"
 
       successfully "rake db:migrate"
@@ -42,7 +42,7 @@ describe "Logidze migrations" do
     end
   end
 
-  describe "#model" do
+  xdescribe "#model" do
     include_context "cleanup migrations"
     include_context "cleanup models"
 

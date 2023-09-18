@@ -1,15 +1,7 @@
 DELIMITER $$
-
-CREATE PROCEDURE logidze_version(
-    IN v bigint,
-    IN data JSON,
--- тут будет фигня с таймзонами
-    IN ts timestamp,
-    OUT result JSON
-)
--- version: 1
+DROP PROCEDURE IF EXISTS logidze_version$$
+CREATE PROCEDURE logidze_version(IN v bigint, IN data JSON, IN ts timestamp, OUT result JSON)
 BEGIN
-    -- TODO
+-- version: 1
 END$$
-
 DELIMITER ;

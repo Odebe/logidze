@@ -76,6 +76,19 @@ module Logidze
               end
           end
 
+          # Generate `logidze_logger_after.sql` from the regular `logidze_logger.sql`
+          # by find-and-replacing a few lines
+          def generate_logidze_logger_after
+            source = File.read(File.join(__dir__, "functions", "logidze_logger.sql"))
+            source.sub!(/^DROP PROCEDURE IF EXISTS logidze_logger.*$/, "")
+            source.sub!(/^CREATE PROCEDURE logidze_logger.*$/, "")
+            source.sub!(/^BEGIN$/, "")
+            source.sub!(/^-- version.*$/, "")
+            source.sub!(/^DELIMITER \$\$/, "")
+
+            source
+          end
+
           def function_definitions
             @function_definitions ||= Logidze::Utils::FunctionDefinitions.from_fs
           end

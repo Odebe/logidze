@@ -1,9 +1,7 @@
 DELIMITER $$
-
-CREATE PROCEDURE logidze_logger()
--- version: 1
+DROP PROCEDURE IF EXISTS logidze_logger$$
+CREATE PROCEDURE logidze_logger(old json, new json)
 BEGIN
--- TODO
-END$$
-
+-- version: 1
+END $$
 DELIMITER ;

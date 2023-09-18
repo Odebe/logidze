@@ -25,11 +25,34 @@ module Logidze
             end
 
             def from_fs
-              []
+              function_paths.map do |path|
+                name = path.match(/([^\/]+)\.sql/)[1]
+
+                file = File.open(path)
+
+                2.times { file.readline } # skip delimiter and drop procedure
+                header, _begin_block_start = file.readline, file.readline
+                version_comment = file.readline
+
+                signature = parse_signature(header)
+                version = parse_version(version_comment)
+
+                FuncDef.new(name, version, signature)
+              end
             end
 
             def from_db
-              []
+              query = <<~SQL
+                SELECT ROUTINE_NAME AS proname, ROUTINE_DEFINITION as definition
+                FROM information_schema.routines
+                WHERE SPECIFIC_NAME like 'logidze_%';
+              SQL
+
+              ActiveRecord::Base.connection.execute(query).map do |row|
+                version = parse_version(row["definition"])
+                # TODO: procedure signature with help of information_schema.parameters
+                FuncDef.new(row["proname"], version, nil)
+              end
             end
 
             private
@@ -39,8 +62,11 @@ module Logidze
             end
 
             def parse_signature(line)
-              parameters = line.match(/CREATE OR REPLACE FUNCTION\s+[\w_]+\((.*)\)/)[1]
-              parameters.split(/\s*,\s*/).map { |param| param.split(/\s+/, 2).last.sub(/\s+DEFAULT .*$/, "") }.join(", ")
+              parameters = line.match(/CREATE PROCEDURE\s+[\w_]+\(([^\>]*)\)/)[1]
+
+              parameters
+                .split(/\s*,\s*/)
+                .map { |param| param.split(/\s+/, 2).last }.join(", ")
             end
           end
         end
