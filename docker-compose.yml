@@ -1,0 +1,48 @@
+version: "2.4"
+
+services:
+  ruby:
+    image: ruby:2.7
+    environment:
+      - HISTFILE=/app/tmp/.bash_history
+      - BUNDLE_PATH=/bundle
+      - BUNDLE_CONFIG=/app/.bundle/config
+      - DATABASE_URL
+      - FORCE_DB_RESET
+    command: bash
+    working_dir: /app
+    volumes:
+      - .:/app:cached
+      - bundler_data:/bundle
+    tmpfs:
+      - /tmp
+    depends_on:
+      - postgres
+      - mysql
+
+  postgres:
+    image: postgres:11.7
+    volumes:
+      - history:/usr/local/hist
+      - ./.psqlrc:/root/.psqlrc:ro
+      - postgres:/var/lib/postgresql/data
+    environment:
+      PSQL_HISTFILE: /usr/local/hist/.psql_history
+      POSTGRES_PASSWORD: postgres
+      PGPASSWORD: postgres
+    ports:
+      - "5455:5432"
+
+  mysql:
+    image: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: mysql
+    ports:
+      - "3306:3306"
+
+volumes:
+  bundler_data:
+  postgres:
+  history:
