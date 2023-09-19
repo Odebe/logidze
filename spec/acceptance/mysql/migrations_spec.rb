@@ -2,26 +2,34 @@
 
 require "acceptance_helper"
 
-describe "Logidze migrations" do
+describe "Logidze migrations", database: :mysql2 do
   describe "#install" do
-    let(:check_logidze_command) { "ActiveRecord::Base.connection.execute %q{select logidze_version(1, '{}'::jsonb, statement_timestamp())}" }
+    let(:check_logidze_command) do
+      <<~RUBY.strip
+        ActiveRecord::Base
+          .connection
+          .execute %q{SET @logidze_tmp_json = JSON_OBJECT()};
+        
+        ActiveRecord::Base
+          .connection
+          .execute %q{CALL logidze_version(1, JSON_OBJECT(), CURRENT_TIMESTAMP(), @logidze_tmp_json)}
+      RUBY
+    end
 
     include_context "cleanup migrations"
 
     after(:all) do
-      Dir.chdir("#{File.dirname(__FILE__)}/../dummy") do
+      Dir.chdir("#{File.dirname(__FILE__)}/../../dummy") do
         successfully "rake db:migrate"
       end
     end
 
     # Install migration has been already applied at the test suite start
-    xit "rollbacks" do
+    it "rollbacks" do
       successfully %(
         rails runner "#{check_logidze_command}"
       )
 
-      # Rollback twice to remove both hstore and logidze
-      successfully "rake db:rollback"
       successfully "rake db:rollback"
 
       unsuccessfully %(

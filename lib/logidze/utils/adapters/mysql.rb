@@ -30,7 +30,6 @@ module Logidze
 
                 file = File.open(path)
 
-                2.times { file.readline } # skip delimiter and drop procedure
                 header, _begin_block_start = file.readline, file.readline
                 version_comment = file.readline
 

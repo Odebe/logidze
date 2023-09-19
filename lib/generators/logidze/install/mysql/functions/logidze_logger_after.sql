@@ -1,5 +1,3 @@
-DELIMITER $$
-DROP PROCEDURE IF EXISTS logidze_logger_after$$
 CREATE PROCEDURE logidze_logger_after()
 BEGIN
 -- version: 1
