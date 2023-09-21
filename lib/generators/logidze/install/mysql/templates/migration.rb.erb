@@ -1,9 +1,18 @@
 class <%= @migration_class_name %> < ActiveRecord::Migration[<%= ActiveRecord::Migration.current_version %>]
   def up
+<%- if update? -%>
+  <%- function_definitions.each do |f| -%>
+    execute <<~SQL
+      DROP FUNCTION IF EXISTS <%= f.name %>;
+    SQL
+
+  <%- end -%>
+<%- end -%>
 <%- function_definitions.each do |f| -%>
     execute <<~SQL
-      DROP PROCEDURE IF EXISTS <%= f.name %>;
+      DROP FUNCTION IF EXISTS <%= f.name %>;
     SQL
+
     execute <<~SQL
 <%= inject_sql("#{f.name}.sql", indent: 6) %>
     SQL
@@ -15,8 +24,9 @@ class <%= @migration_class_name %> < ActiveRecord::Migration[<%= ActiveRecord::M
 <%- unless update? -%>
   <%- function_definitions.each do |f| -%>
     execute <<~SQL
-      DROP PROCEDURE IF EXISTS <%= f.name %>;
+      DROP FUNCTION IF EXISTS <%= f.name %>;
     SQL
+
   <%- end -%>
 <%- end -%>
   end

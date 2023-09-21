@@ -34,8 +34,6 @@ module Logidze
         class_option :path, type: :string, optional: true,
           desc: "Specify path to the model file"
 
-        class_option :except, type: :array, optional: true
-
         class_option :timestamp_column, type: :string, optional: true,
           desc: "Specify timestamp column"
 
@@ -49,19 +47,12 @@ module Logidze
           desc: "Use after trigger"
 
         def generate_migration
-          if options[:except] && options[:only]
-            warn "Use only one: --only or --except"
+          if options[:except]
+            warn "MySQL does not supports --expect. Use --only"
             exit(1)
           end
+
           migration_template "migration.rb.erb", "db/migrate/#{migration_name}.rb"
-        end
-
-        def generate_fx_trigger
-          return unless fx?
-
-          template_name = after_trigger? ? "logidze_after.sql" : "logidze.sql"
-
-          template template_name, "db/triggers/logidze_on_#{table_name}_v#{next_version.to_s.rjust(2, "0")}.sql"
         end
 
         def inject_logidze_to_model
@@ -88,10 +79,6 @@ module Logidze
             "#{config.table_name_prefix}#{table_name}#{config.table_name_suffix}"
           end
 
-          def limit
-            options[:limit]
-          end
-
           def backfill?
             options[:backfill]
           end
@@ -104,86 +91,45 @@ module Logidze
             options[:update]
           end
 
-          def after_trigger?
-            options[:after_trigger]
+          def logidze_snapshot_parameters
+            [
+              json_object(table_fields('t', filtered_columns)),
+              json_array(filtered_columns)
+            ].join(', ')
+          end
+
+          def new_json
+            json_object(table_fields('NEW', filtered_columns))
+          end
+
+          def old_json
+            json_object(table_fields('OLD', filtered_columns))
+          end
+
+          def columns_json
+            json_array(filtered_columns.map { |field| escape_string(field) })
+          end
+
+          def table_fields(table, fields)
+            fields.flat_map { |field| [escape_string(field), "#{table}.#{field}"] }
           end
 
           def filtered_columns
-            format_pgsql_array(options[:only] || options[:except])
+            options[:only] + ['log_data']
           end
 
-          def include_columns
-            return unless options[:only] || options[:except]
-            options[:only].present?
+          def json_object(array)
+            "JSON_OBJECT(" + array.join(", ") + ")"
           end
 
-          def timestamp_column
-            value = options[:timestamp_column] || "updated_at"
-            return if %w[nil null false].include?(value)
-
-            escape_pgsql_string(value)
+          def json_array(array)
+            "JSON_ARRAY(" + array.join(", ") + ")"
           end
 
-          def debounce_time
-            options[:debounce_time]
-          end
-
-          def previous_version
-            @previous_version ||= all_triggers.filter_map { |path| Regexp.last_match[1].to_i if path =~ %r{logidze_on_#{table_name}_v(\d+).sql} }.max
-          end
-
-          def next_version
-            previous_version&.next || 1
-          end
-
-          def all_triggers
-            @all_triggers ||=
-              begin
-                res = nil
-                in_root do
-                  res =
-                    if File.directory?("db/triggers")
-                      Dir.entries("db/triggers")
-                    else
-                      []
-                    end
-                end
-                res
-              end
-          end
-
-          def logidze_logger_parameters
-            format_pgsql_args(limit, timestamp_column, filtered_columns, include_columns, debounce_time)
-          end
-
-          def logidze_snapshot_parameters
-            format_pgsql_args("to_jsonb(t)", timestamp_column, filtered_columns, include_columns)
-          end
-
-          def format_pgsql_array(ruby_array)
-            return if ruby_array.blank?
-
-            "'{" + ruby_array.join(", ") + "}'"
-          end
-
-          def escape_pgsql_string(string)
+          def escape_string(string)
             return if string.blank?
 
             "'#{string}'"
-          end
-
-          # Convenience method for formatting pg arguments.
-          # Some examples:
-          # format_pgsql_args('a', 'b', nil) #=> "a, b"
-          # format_pgsql_args(nil, '', 'c')  #=> "null, null, c"
-          # format_pgsql_args('a', '', [])   #=> "a"
-          def format_pgsql_args(*values)
-            args = []
-            values.reverse_each do |value|
-              formatted_value = value.presence || (args.any? && "null")
-              args << formatted_value if formatted_value
-            end
-            args.compact.reverse.join(", ")
           end
         end
 

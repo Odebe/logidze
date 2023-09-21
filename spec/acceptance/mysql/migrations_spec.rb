@@ -8,11 +8,7 @@ describe "Logidze migrations", database: :mysql2 do
       <<~RUBY.strip
         ActiveRecord::Base
           .connection
-          .execute %q{SET @logidze_tmp_json = JSON_OBJECT()};
-        
-        ActiveRecord::Base
-          .connection
-          .execute %q{CALL logidze_version(1, JSON_OBJECT(), CURRENT_TIMESTAMP(), @logidze_tmp_json)}
+          .execute %q{SELECT logidze_version(1, JSON_OBJECT(), CURRENT_TIMESTAMP())}
       RUBY
     end
 
@@ -37,7 +33,7 @@ describe "Logidze migrations", database: :mysql2 do
       )
     end
 
-    xit "creates update migration" do
+    it "creates update migration" do
       successfully "rails generate logidze:install --update"
 
       successfully "rake db:migrate"
@@ -50,7 +46,7 @@ describe "Logidze migrations", database: :mysql2 do
     end
   end
 
-  xdescribe "#model" do
+  describe "#model" do
     include_context "cleanup migrations"
     include_context "cleanup models"
 
@@ -62,7 +58,7 @@ describe "Logidze migrations", database: :mysql2 do
     end
 
     it "creates migration and patches model" do
-      successfully "rails generate logidze:model Movie"
+      successfully "rails generate logidze:model Movie --only=title"
 
       verify_file_contains "app/models/movie.rb", "has_logidze"
 

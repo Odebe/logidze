@@ -61,7 +61,7 @@ module Logidze
             end
 
             def parse_signature(line)
-              parameters = line.match(/CREATE PROCEDURE\s+[\w_]+\(([^\>]*)\)/)[1]
+              parameters = line.match(/CREATE FUNCTION\s+[\w_]+\(([^\>]*)\)/)[1]
 
               parameters
                 .split(/\s*,\s*/)

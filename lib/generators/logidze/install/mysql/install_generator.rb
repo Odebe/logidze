@@ -25,18 +25,7 @@ module Logidze
           desc: "Define whether this is an update migration"
 
         def generate_migration
-          migration_template = fx? ? "migration_fx.rb.erb" : "migration.rb.erb"
-          migration_template migration_template, "db/migrate/#{migration_name}.rb"
-        end
-
-        def generate_fx_functions
-          return unless fx?
-
-          function_definitions.each do |fdef|
-            next if fdef.version == previous_version_for(fdef.name)
-
-            template "#{fdef.name}.sql", "db/functions/#{fdef.name}_v#{fdef.version.to_s.rjust(2, "0")}.sql"
-          end
+          migration_template "migration.rb.erb", "db/migrate/#{migration_name}.rb"
         end
 
         no_tasks do
@@ -54,39 +43,6 @@ module Logidze
 
           def update?
             options[:update]
-          end
-
-          def previous_version_for(name)
-            all_functions.filter_map { |path| Regexp.last_match[1].to_i if path =~ %r{#{name}_v(\d+).sql} }.max
-          end
-
-          def all_functions
-            @all_functions ||=
-              begin
-                res = nil
-                in_root do
-                  res =
-                    if File.directory?("db/functions")
-                      Dir.entries("db/functions")
-                    else
-                      []
-                    end
-                end
-                res
-              end
-          end
-
-          # Generate `logidze_logger_after.sql` from the regular `logidze_logger.sql`
-          # by find-and-replacing a few lines
-          def generate_logidze_logger_after
-            source = File.read(File.join(__dir__, "functions", "logidze_logger.sql"))
-            source.sub!(/^DROP PROCEDURE IF EXISTS logidze_logger.*$/, "")
-            source.sub!(/^CREATE PROCEDURE logidze_logger.*$/, "")
-            source.sub!(/^BEGIN$/, "")
-            source.sub!(/^-- version.*$/, "")
-            source.sub!(/^DELIMITER \$\$/, "")
-
-            source
           end
 
           def function_definitions

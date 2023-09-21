@@ -1,15 +1,13 @@
-CREATE PROCEDURE logidze_version(IN v bigint, IN data JSON, IN ts timestamp, OUT result JSON)
+CREATE FUNCTION logidze_version(v bigint, data JSON, ts text) RETURNS json NO SQL
 BEGIN
     -- version: 1
+    DECLARE result json;
+
     SET result = JSON_OBJECT(
-        'ts',
-        UNIX_TIMESTAMP(ts),
-        'v',
-        v,
-        'c',
-        -- workaround because JSON_REMOVE returns removed value
-        JSON_REPLACE(data, '$.log_data', null)
+            'ts', UNIX_TIMESTAMP(ts),
+            'v', v,
+            'c', JSON_REMOVE(data, '$.log_data')
         );
-    -- TODO: check meta
-    select result;
+
+    RETURN result;
 END;
