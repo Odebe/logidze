@@ -1,4 +1,4 @@
-CREATE FUNCTION logidze_compact_history(log_data JSON, cutoff integer) RETURNS json NO SQL
+CREATE FUNCTION logidze_compact_history(log_data json, cutoff integer) RETURNS json NO SQL
 BEGIN
     -- version: 1
     DECLARE cutoff integer default 1;

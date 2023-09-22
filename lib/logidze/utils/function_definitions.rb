@@ -1,13 +1,11 @@
 # frozen_string_literal: true
 
 require_relative '../implementation/load'
+require_relative '../implementation/abstract/function_definitions'
 
 module Logidze
   module Utils
-    module FunctionDefinitions
-      class << self
-        delegate :from_fs, :from_db, to: Implementation::Current::FunctionDefinitions
-      end
-    end
+    FunctionDefinitions = Implementation::Current::FunctionDefinitions
+    FuncDef = Implementation::Abstract::FunctionDefinitions::FuncDef
   end
 end

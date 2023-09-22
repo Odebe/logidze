@@ -41,7 +41,8 @@ module Logidze
             <<~SQL
               SELECT ROUTINE_NAME AS proname, ROUTINE_DEFINITION as definition
               FROM information_schema.routines
-              WHERE SPECIFIC_NAME like 'logidze_%';
+              WHERE SPECIFIC_NAME like 'logidze_%'
+              ORDER BY ROUTINE_NAME;
             SQL
           end
 

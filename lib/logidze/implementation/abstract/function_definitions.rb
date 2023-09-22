@@ -15,7 +15,7 @@ module Logidze
         end
 
         def from_db
-          ActiveRecord::Base.connection.execute(from_db_query).map do |row|
+          ActiveRecord::Base.connection.exec_query(from_db_query).map do |row|
             version = parse_version(row["definition"])
 
             FuncDef.new(row["proname"], version, nil)

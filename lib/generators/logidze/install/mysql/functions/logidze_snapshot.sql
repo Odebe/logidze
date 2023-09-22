@@ -1,4 +1,4 @@
-CREATE FUNCTION logidze_snapshot(item JSON, columns json) RETURNS json NO SQL
+CREATE FUNCTION logidze_snapshot(item json, columns json) RETURNS json NO SQL
 BEGIN
     -- version: 1
     DECLARE result json;
@@ -14,7 +14,7 @@ BEGIN
         SET current_key = JSON_EXTRACT(columns, CONCAT('$[', i, ']'));
         SET current_key_path = CONCAT('$.', current_key);
 
-        IF JSON_TYPE(version_content) = 'OBJECT' THEN
+        IF JSON_TYPE(JSON_EXTRACT(version_content, current_key_path)) = 'OBJECT' THEN
             SET version_content = JSON_REPLACE(
                 version_content,
                 current_key_path,
