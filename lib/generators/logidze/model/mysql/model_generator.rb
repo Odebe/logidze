@@ -87,14 +87,28 @@ module Logidze
             options[:only_trigger]
           end
 
+          def limit
+            options[:limit]
+          end
+
           def update?
             options[:update]
+          end
+
+          def logidze_logger_parameters(trigger_type)
+            [
+              'old_j',
+              'new_j',
+              columns_json,
+              escape_string(trigger_type),
+              limit.presence || 'NULL'
+            ].compact.join(', ')
           end
 
           def logidze_snapshot_parameters
             [
               json_object(table_fields('t', filtered_columns)),
-              json_array(filtered_columns)
+              columns_json
             ].join(', ')
           end
 

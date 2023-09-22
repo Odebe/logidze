@@ -38,7 +38,10 @@ class <%= @migration_class_name %> < ActiveRecord::Migration[<%= ActiveRecord::M
       dir.up do
         execute <<~SQL
           UPDATE <%= full_table_name %> as t
-          SET log_data = logidze_snapshot(<%= logidze_snapshot_parameters %>);
+          SET log_data = logidze_snapshot(
+              <%= json_object(table_fields('t', filtered_columns)) %>,
+              <%= columns_json %>
+          );
         SQL
       end
     end

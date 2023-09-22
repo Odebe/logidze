@@ -4,9 +4,10 @@ ENV["RAILS_ENV"] = "test"
 
 begin
   require "debug" unless ENV["CI"] == "true"
-  require "debug/open_nonstop"
 rescue LoadError # rubocop:disable Lint/HandleExceptions
 end
+
+require 'byebug'
 
 require "ammeter"
 require "timecop"
@@ -20,7 +21,7 @@ RSpec.configure do |config|
     mocks.verify_partial_doubles = true
   end
 
-  config.filter_run_excluding database: ->(name) { name.to_s != Logidze::DbSelectionHelpers.current_db_adapter }
+  config.filter_run_excluding database: ->(name) { name.to_s != Logidze::Implementation.adapter_name }
 
   config.example_status_persistence_file_path = "tmp/rspec_examples.txt"
   config.filter_run :focus
@@ -34,6 +35,7 @@ RSpec.configure do |config|
   end
 
   config.include Logidze::TestHelpers
+  config.include Logidze::DbSelectionHelpers
 
   config.before(:each, db: true) do
     ActiveRecord::Base.connection.begin_transaction(joinable: false)

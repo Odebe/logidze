@@ -8,7 +8,12 @@ describe "triggers", :db do
   before(:all) do
     @old_post = Post.create!(title: "First", rating: 100, active: true)
     Dir.chdir("#{File.dirname(__FILE__)}/../dummy") do
-      successfully "rails generate logidze:model post --limit 4 --backfill"
+      if mysql?
+        successfully "rails generate logidze:model post --limit 4 --backfill --only=title rating active meta data"
+      else
+        successfully "rails generate logidze:model post --limit 4 --backfill"
+      end
+
       successfully "rake db:migrate"
 
       # Close active connections to handle db variables
@@ -359,7 +364,7 @@ describe "triggers", :db do
     end
   end
 
-  describe "limit" do
+  describe "limit", database: :postgresql do
     before(:all) { @post = Post.create!(title: "Triggers", rating: 10) }
     after(:all) { @post.destroy! }
 
@@ -393,30 +398,55 @@ describe "triggers", :db do
 
     let(:post) { @post.reload }
 
-    it "creates a new version with a full snapshot instead of a diff" do
-      expect(post.log_version).to eq 1
-      post.update!(title: "Full me")
+    context 'with postgresql adapter', database: :postgresql do
+      it "creates a new version with a full snapshot instead of a diff" do
+        expect(post.log_version).to eq 1
+        post.update!(title: "Full me")
 
-      expect(post.reload.log_version).to eq 2
+        expect(post.reload.log_version).to eq 2
 
-      Logidze.without_logging do
-        post.update!(active: true)
-        post.update!(rating: 22)
+        Logidze.without_logging do
+          post.update!(active: true)
+          post.update!(rating: 22)
+        end
+
+        expect(post.reload.log_version).to eq 2
+
+        expect(post.log_data.versions.last.changes)
+          .to include("title" => "Full me")
+        expect(post.log_data.versions.last.changes.keys)
+          .not_to include("rating", "active")
+
+        Logidze.with_full_snapshot { post.touch }
+
+        expect(post.reload.log_version).to eq 3
+
+        expect(post.log_data.versions.last.changes)
+          .to include("title" => "Full me", "rating" => 22, "active" => true)
       end
+    end
 
-      expect(post.reload.log_version).to eq 2
+    context 'with mysql adapter', database: :mysql do
+      it "does not creates a new version on touch" do
+        expect(post.log_version).to eq 1
+        post.update!(title: "Full me")
 
-      expect(post.log_data.versions.last.changes)
-        .to include("title" => "Full me")
-      expect(post.log_data.versions.last.changes.keys)
-        .not_to include("rating", "active")
+        expect(post.reload.log_version).to eq 2
 
-      Logidze.with_full_snapshot { post.touch }
+        Logidze.without_logging do
+          post.update!(active: true)
+          post.update!(rating: 22)
+        end
 
-      expect(post.reload.log_version).to eq 3
+        expect(post.reload.log_version).to eq 2
 
-      expect(post.log_data.versions.last.changes)
-        .to include("title" => "Full me", "rating" => 22, "active" => true)
+        expect(post.log_data.versions.last.changes).to include("title" => "Full me")
+        expect(post.log_data.versions.last.changes.keys).not_to include("rating", "active")
+
+        Logidze.with_full_snapshot { post.touch }
+
+        expect(post.reload.log_version).to eq 2
+      end
     end
   end
 end

@@ -1,13 +1,19 @@
 # frozen_string_literal: true
 
-require "logidze/utils/db_selection"
+require "logidze/implementation"
 
 module Logidze
   module DbSelectionHelpers # :nodoc:
     def current_db_adapter
-      Logidze::Utils::DbSelection.adapter_name
+      Logidze::Implementation.adapter_name
     end
 
-    extend self # rubocop: disable all
+    def postgresql?
+      current_db_adapter == 'postgresql'
+    end
+
+    def mysql?
+      current_db_adapter == 'mysql2'
+    end
   end
 end

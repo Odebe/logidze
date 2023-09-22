@@ -9,5 +9,9 @@ BEGIN
             'c', JSON_REMOVE(data, '$.log_data')
         );
 
+    IF COALESCE(@logidze.meta, '') <> '' THEN
+        SET result = JSON_INSERT(result, '$.m', JSON_UNQUOTE(@logidze.meta));
+    END IF;
+
     RETURN result;
 END;

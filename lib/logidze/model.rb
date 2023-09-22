@@ -44,24 +44,7 @@ module Logidze
 
       # Initialize log_data with the current state if it's null
       def create_logidze_snapshot(timestamp: nil, only: nil, except: nil)
-        args = ["'null'"]
-
-        args[0] = "'#{timestamp}'" if timestamp
-
-        columns = only || except
-
-        if columns
-          args[1] = "'{#{columns.join(",")}}'"
-          args[2] = only ? "true" : "false"
-        end
-
-        without_logging do
-          where(log_data: nil).update_all(
-            <<~SQL
-              log_data = logidze_snapshot(to_jsonb(#{quoted_table_name}), #{args.join(", ")})
-            SQL
-          )
-        end
+        Implementation::Current::Snapshot.create(model, timestamp: timestamp, only: only, except: except)
       end
     end
 
