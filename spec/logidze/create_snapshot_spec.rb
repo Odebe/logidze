@@ -22,68 +22,86 @@ describe "create logidze snapshot", :db do
     end
   end
 
-  describe "#create_logidze_snapshot!" do
-    specify "without arguments" do
-      expect(user.log_data).to be_nil
+  context 'with postgresql adapter', database: :postgresql do
+    describe "#create_logidze_snapshot!" do
+      specify "without arguments" do
+        expect(user.log_data).to be_nil
 
-      user.create_logidze_snapshot!
+        user.create_logidze_snapshot!
 
-      expect(user.log_data).not_to be_nil
-      expect(user.log_data.version).to eq 1
-      expect(Time.at(user.log_data.current_version.time / 1000) - now).to be > 1.year
-      expect(user.log_data.current_version.changes)
-        .to include({
-          "name" => "test",
-          "age" => 10,
-          "active" => false,
-          "extra" => '{"gender": "X"}'
-        })
+        expect(user.log_data).not_to be_nil
+        expect(user.log_data.version).to eq 1
+        expect(Time.at(user.log_data.current_version.time / 1000) - now).to be > 1.year
+        expect(user.log_data.current_version.changes)
+          .to include({
+                        "name" => "test",
+                        "age" => 10,
+                        "active" => false,
+                        "extra" => '{"gender": "X"}'
+                      })
+      end
+
+      specify "timestamp column" do
+        expect(user.log_data).to be_nil
+
+        user.create_logidze_snapshot!(timestamp: :time)
+
+        expect(user.log_data).not_to be_nil
+        expect(user.log_data.version).to eq 1
+        expect(user.log_data.current_version.time).to eq(now.to_i * 1_000)
+      end
+
+      specify "columns filtering: only" do
+        expect(user.log_data).to be_nil
+
+        user.create_logidze_snapshot!(only: %w[name age])
+
+        expect(user.log_data).not_to be_nil
+        expect(user.log_data.version).to eq 1
+        expect(user.log_data.current_version.changes).to eq({"name" => "test", "age" => 10})
+      end
+
+      specify "columns filtering: except" do
+        expect(user.log_data).to be_nil
+
+        user.create_logidze_snapshot!(except: %w[age])
+
+        expect(user.log_data).not_to be_nil
+        expect(user.log_data.version).to eq 1
+        expect(user.log_data.current_version.changes.keys).to include("name", "active")
+        expect(user.log_data.current_version.changes.keys).not_to include("age")
+      end
     end
 
-    specify "timestamp column" do
-      expect(user.log_data).to be_nil
+    describe ".create_logidze_snapshot" do
+      specify do
+        expect(user.log_data).to be_nil
 
-      user.create_logidze_snapshot!(timestamp: :time)
+        User.where(id: user.id).create_logidze_snapshot(timestamp: :time, only: %w[name age])
 
-      expect(user.log_data).not_to be_nil
-      expect(user.log_data.version).to eq 1
-      expect(user.log_data.current_version.time).to eq(now.to_i * 1_000)
-    end
+        user.reload
 
-    specify "columns filtering: only" do
-      expect(user.log_data).to be_nil
-
-      user.create_logidze_snapshot!(only: %w[name age])
-
-      expect(user.log_data).not_to be_nil
-      expect(user.log_data.version).to eq 1
-      expect(user.log_data.current_version.changes).to eq({"name" => "test", "age" => 10})
-    end
-
-    specify "columns filtering: except" do
-      expect(user.log_data).to be_nil
-
-      user.create_logidze_snapshot!(except: %w[age])
-
-      expect(user.log_data).not_to be_nil
-      expect(user.log_data.version).to eq 1
-      expect(user.log_data.current_version.changes.keys).to include("name", "active")
-      expect(user.log_data.current_version.changes.keys).not_to include("age")
+        expect(user.log_data).not_to be_nil
+        expect(user.log_data.version).to eq 1
+        expect(user.log_data.current_version.time).to eq(now.to_i * 1_000)
+        expect(user.log_data.current_version.changes).to eq({"name" => "test", "age" => 10})
+      end
     end
   end
 
-  describe ".create_logidze_snapshot" do
-    specify do
-      expect(user.log_data).to be_nil
+  context 'with mysql adapter', database: :mysql2 do
+    describe "#create_logidze_snapshot!" do
+      specify do
+        expect { user.create_logidze_snapshot! }.to raise_error(Logidze::NotImplemented)
+      end
+    end
 
-      User.where(id: user.id).create_logidze_snapshot(timestamp: :time, only: %w[name age])
-
-      user.reload
-
-      expect(user.log_data).not_to be_nil
-      expect(user.log_data.version).to eq 1
-      expect(user.log_data.current_version.time).to eq(now.to_i * 1_000)
-      expect(user.log_data.current_version.changes).to eq({"name" => "test", "age" => 10})
+    describe ".create_logidze_snapshot" do
+      specify do
+        expect {
+          User.where(id: user.id).create_logidze_snapshot(timestamp: :time, only: %w[name age])
+        }.to raise_error(Logidze::NotImplemented)
+      end
     end
   end
 end

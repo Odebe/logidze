@@ -44,7 +44,13 @@ module Logidze
 
       # Initialize log_data with the current state if it's null
       def create_logidze_snapshot(timestamp: nil, only: nil, except: nil)
-        Implementation::Current::Snapshot.create(model, timestamp: timestamp, only: only, except: except)
+        Implementation::Current::Snapshot
+          .create(
+            where(log_data: nil),
+            timestamp: timestamp,
+            only: only,
+            except: except
+          )
       end
     end
 

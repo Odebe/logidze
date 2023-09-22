@@ -5,6 +5,7 @@ require "logidze/version"
 # Logidze provides tools for adding in-table JSON-based audit to DB tables
 # and ActiveRecord extensions to work with changes history.
 module Logidze
+  require "logidze/error"
   require "logidze/implementation"
   require "logidze/history"
   require "logidze/model"

@@ -8,10 +8,10 @@ module Logidze
       class Snapshot < Abstract::Snapshot
         private
 
-        def process_scope(scope)
+        def process_scope
           scope.update_all(
             <<~SQL
-              log_data = logidze_snapshot(to_jsonb(#{model.quoted_table_name}), #{args.join(", ")})
+              log_data = logidze_snapshot(to_jsonb(#{scope.quoted_table_name}), #{args.join(", ")})
             SQL
           )
         end

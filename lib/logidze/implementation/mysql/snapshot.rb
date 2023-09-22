@@ -4,12 +4,10 @@ require_relative '../abstract/snapshot'
 
 module Logidze
   module Implementation
-    module Pg
+    module Mysql
       class Snapshot < Abstract::Snapshot
-        private
-
-        def process_scope(scope)
-          scope
+        def perform
+          raise Logidze::NotImplemented, "Snapshots not implemented for MySQL"
         end
       end
     end

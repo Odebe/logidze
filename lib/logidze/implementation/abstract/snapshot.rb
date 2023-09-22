@@ -4,24 +4,26 @@ module Logidze
   module Implementation
     module Abstract
       class Snapshot
-        def self.create(model, **opts)
-          new(model, opts).call
+        def self.create(scope, **opts)
+          new(scope, opts).perform
         end
 
-        def initialize(model, opts)
-          @model = model
+        attr_reader :scope, :opts
+
+        delegate :without_logging, to: Logidze
+
+        def initialize(scope, opts)
+          @scope = scope
           @opts = opts
         end
 
-        def call
-          model.without_logging do
-            process_scope(model.where(log_data: nil))
-          end
+        def perform
+          without_logging { process_scope }
         end
 
         private
 
-        def process_scope(_scope)
+        def process_scope
           raise 'abstract method'
         end
       end
