@@ -7,6 +7,58 @@ on:
   pull_request:
 
 jobs:
+  rspec_mysql:
+    runs-on: ubuntu-latest
+    env:
+      BUNDLE_JOBS: 4
+      BUNDLE_RETRY: 3
+      CI: true
+      RAILS_ENV: test
+      DATABASE_URL: mysql://root:mysql@localhost:3306
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby: [ "3.1" ]
+        mysql: [ "8" ]
+        gemfile: [
+          "gemfiles/rails7.gemfile"
+        ]
+        include:
+          - ruby: "3.2"
+            gemfile: "gemfiles/railsmaster.gemfile"
+          - ruby: "2.7"
+            gemfile: "gemfiles/rails6.gemfile"
+    services:
+      mysql:
+        image: mysql:${{ matrix.mysql }}
+        ports: ["3306:3306"]
+        env:
+          POSTGRES_PASSWORD: 3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s 
+          --health-retries=5
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install system deps
+        run: |
+          sudo apt-get update
+          sudo apt-get -yqq install install libmysqlclient-dev
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+      - name: Prepare test database
+        run: |
+          bundle exec rake dummy:db:create
+      - name: Run RSpec (unit, integrations)
+        run: |
+          bundle exec rspec --exclude-pattern=spec/acceptance/**/* -f d --force-color
+      - name: Run RSpec (acceptance)
+        run: |
+          bundle exec rspec spec/acceptance/ -f d --force-color
+
   rspec:
     runs-on: ubuntu-latest
     env:
