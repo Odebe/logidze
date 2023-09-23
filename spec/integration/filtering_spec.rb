@@ -10,7 +10,7 @@ describe "columns filtering", :db do
     end
   end
 
-  context "with except" do
+  context "with except", database: :postgresql do
     include_context "cleanup migrations"
 
     before(:all) do

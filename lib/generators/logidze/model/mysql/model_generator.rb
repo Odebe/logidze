@@ -19,6 +19,9 @@ module Logidze
         class_option :only, type: :array, required: true,
           desc: "Specify model keys to track"
 
+        class_option :except, type: :array, optional: true,
+           desc: "Not supported for MySQL"
+
         class_option :limit, type: :numeric, optional: true,
           desc: "Specify history size limit"
 
