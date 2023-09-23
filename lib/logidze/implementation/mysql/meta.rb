@@ -14,7 +14,7 @@ module Logidze
           end
 
           def db_set_meta_param(value)
-            connection.execute("SET @logidze.meta = JSON_UNQUOTE(#{encode_meta(value)});")
+            connection.execute("SET @logidze.meta = #{encode_meta(value)};")
           end
 
           def db_clear_meta_param
@@ -26,11 +26,11 @@ module Logidze
           private
 
           def db_set_meta_param(value)
-            connection.execute("SET SESSION @logidze.meta = JSON_UNQUOTE(#{encode_meta(value)});")
+            connection.execute("SET @logidze.meta = #{encode_meta(value)};")
           end
 
           def db_clear_meta_param
-            connection.execute("SET SESSION @logidze.meta = NULL;")
+            connection.execute("SET @logidze.meta = NULL;")
           end
         end
       end
