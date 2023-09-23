@@ -88,8 +88,16 @@ describe "triggers", :db do
       expect(diff["title"]).to eq expected_diff_title
 
       snapshot = JSON.parse(post.read_attribute_before_type_cast(:log_data))
+
+      expected_meta_field =
+        if mysql?
+          { "tags" => %w[some tag] }
+        else
+          '{"tags": ["some", "tag"]}'
+        end
+
       expect(snapshot["h"].first).to include({
-        "c" => a_hash_including({"meta" => '{"tags": ["some", "tag"]}'})
+        "c" => a_hash_including({"meta" => expected_meta_field})
       })
     end
 
