@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative '../abstract/meta'
+require_relative "../abstract/meta"
 
 module Logidze
   module Implementation

@@ -19,10 +19,10 @@ describe "logidze_snapshot", database: :mysql2 do
 
     expect(version)
       .to match({
-       "ts" => an_instance_of(Integer),
-       "v" => 1,
-       "c" => {"name" => "Jack"}
-     })
+        "ts" => an_instance_of(Integer),
+        "v" => 1,
+        "c" => {"name" => "Jack"}
+      })
 
     expect(Time.at(version["ts"] / 1000) - now).to be > 1.year
   end

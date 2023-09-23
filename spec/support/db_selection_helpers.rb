@@ -9,11 +9,11 @@ module Logidze
     end
 
     def postgresql?
-      current_db_adapter == 'postgresql'
+      current_db_adapter == "postgresql"
     end
 
     def mysql?
-      current_db_adapter == 'mysql2'
+      current_db_adapter == "mysql2"
     end
   end
 end

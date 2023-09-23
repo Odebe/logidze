@@ -4,7 +4,7 @@ require "spec_helper"
 require "logidze/utils/function_definitions"
 
 describe Logidze::Utils::FunctionDefinitions do
-  context 'with postgresql adapter', database: :postgresql do
+  context "with postgresql adapter", database: :postgresql do
     describe ".from_fs" do
       subject { described_class.from_fs }
 
@@ -34,7 +34,7 @@ describe Logidze::Utils::FunctionDefinitions do
     end
   end
 
-  context 'with mysql adapter', database: :mysql2 do
+  context "with mysql adapter", database: :mysql2 do
     describe ".from_fs" do
       subject { described_class.from_fs }
 

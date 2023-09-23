@@ -219,7 +219,7 @@ describe "logs metadata", :db do
       context "with Rails touch:true" do
         let!(:article) { Article.create!(title: "test", user: user) }
 
-        context 'with postgesql', database: :postgresql do
+        context "with postgesql", database: :postgresql do
           it "updating a record updates the parent record's log_data with the correct meta" do
             Logidze.with_meta(meta, transactional: false) do
               article.touch(time: 1.minute.since)
@@ -229,7 +229,7 @@ describe "logs metadata", :db do
           end
         end
 
-        context 'with mysql', database: :mysql2 do
+        context "with mysql", database: :mysql2 do
           it "does not updating a record updates the parent record's log_data with the correct meta" do
             Logidze.with_meta(meta, transactional: false) do
               article.touch(time: 1.minute.since)

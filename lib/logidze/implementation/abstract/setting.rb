@@ -42,11 +42,11 @@ module Logidze
           end
 
           def db_set_setting_param
-            raise 'abstract method'
+            raise "abstract method"
           end
 
           def db_clear_setting_param
-            raise 'abstract method'
+            raise "abstract method"
           end
         end
       end

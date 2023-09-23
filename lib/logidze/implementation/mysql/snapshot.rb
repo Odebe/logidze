@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative '../abstract/snapshot'
+require_relative "../abstract/snapshot"
 
 module Logidze
   module Implementation

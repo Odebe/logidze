@@ -7,7 +7,7 @@ module Logidze
   end
 end
 
-require_relative 'pg/function_definitions'
-require_relative 'pg/meta'
-require_relative 'pg/setting'
-require_relative 'pg/snapshot'
+require_relative "pg/function_definitions"
+require_relative "pg/meta"
+require_relative "pg/setting"
+require_relative "pg/snapshot"

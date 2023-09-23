@@ -20,7 +20,7 @@ module Logidze
           desc: "Specify model keys to track"
 
         class_option :except, type: :array, optional: true,
-           desc: "Not supported for MySQL"
+          desc: "Not supported for MySQL"
 
         class_option :limit, type: :numeric, optional: true,
           desc: "Specify history size limit"
@@ -100,27 +100,27 @@ module Logidze
 
           def logidze_logger_parameters(trigger_type)
             [
-              'old_j',
-              'new_j',
+              "old_j",
+              "new_j",
               columns_json,
               escape_string(trigger_type),
-              limit.presence || 'NULL'
-            ].compact.join(', ')
+              limit.presence || "NULL"
+            ].compact.join(", ")
           end
 
           def logidze_snapshot_parameters
             [
-              json_object(table_fields('t', filtered_columns)),
+              json_object(table_fields("t", filtered_columns)),
               columns_json
-            ].join(', ')
+            ].join(", ")
           end
 
           def new_json
-            json_object(table_fields('NEW', filtered_columns))
+            json_object(table_fields("NEW", filtered_columns))
           end
 
           def old_json
-            json_object(table_fields('OLD', filtered_columns))
+            json_object(table_fields("OLD", filtered_columns))
           end
 
           def columns_json
@@ -132,7 +132,7 @@ module Logidze
           end
 
           def filtered_columns
-            options[:only] + ['log_data']
+            options[:only] + ["log_data"]
           end
 
           def json_object(array)

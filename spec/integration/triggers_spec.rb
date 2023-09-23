@@ -91,7 +91,7 @@ describe "triggers", :db do
 
       expected_meta_field =
         if mysql?
-          { "tags" => %w[some tag] }
+          {"tags" => %w[some tag]}
         else
           '{"tags": ["some", "tag"]}'
         end
@@ -406,7 +406,7 @@ describe "triggers", :db do
 
     let(:post) { @post.reload }
 
-    context 'with postgresql adapter', database: :postgresql do
+    context "with postgresql adapter", database: :postgresql do
       it "creates a new version with a full snapshot instead of a diff" do
         expect(post.log_version).to eq 1
         post.update!(title: "Full me")
@@ -434,7 +434,7 @@ describe "triggers", :db do
       end
     end
 
-    context 'with mysql adapter', database: :mysql do
+    context "with mysql adapter", database: :mysql do
       it "does not creates a new version on touch" do
         expect(post.log_version).to eq 1
         post.update!(title: "Full me")

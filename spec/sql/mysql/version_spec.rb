@@ -12,10 +12,10 @@ describe "logidze_version", database: :mysql2 do
 
     expect(version)
       .to match({
-         "ts" => an_instance_of(Integer),
-         "v" => 23,
-         "c" => {"title" => "Feel me", "rating" => 42, "name" => "Jack"}
-       })
+        "ts" => an_instance_of(Integer),
+        "v" => 23,
+        "c" => {"title" => "Feel me", "rating" => 42, "name" => "Jack"}
+      })
   end
 
   specify "with meta" do
@@ -27,10 +27,10 @@ describe "logidze_version", database: :mysql2 do
 
     expect(version)
       .to match({
-       "ts" => an_instance_of(Integer),
-       "v" => 43,
-       "c" => {"title" => "Feel me", "rating" => 42, "name" => "Jack"},
-       "m" => {"cat" => "matroskin"}
-     })
+        "ts" => an_instance_of(Integer),
+        "v" => 43,
+        "c" => {"title" => "Feel me", "rating" => 42, "name" => "Jack"},
+        "m" => {"cat" => "matroskin"}
+      })
   end
 end

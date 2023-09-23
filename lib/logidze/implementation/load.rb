@@ -8,7 +8,7 @@ module Logidze
         require_relative "pg"
 
         Implementation::Pg
-      when 'mysql2', 'mysql'
+      when "mysql2", "mysql"
         require_relative "mysql"
 
         Implementation::Mysql
@@ -16,6 +16,6 @@ module Logidze
         raise "Not supported database '#{adapter_name}'"
       end
 
-    const_set('Current', current)
+    const_set("Current", current)
   end
 end

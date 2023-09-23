@@ -28,4 +28,4 @@ module Logidze
   end
 end
 
-require_relative 'implementation/load'
+require_relative "implementation/load"

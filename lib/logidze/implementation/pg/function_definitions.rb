@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative '../abstract/function_definitions'
+require_relative "../abstract/function_definitions"
 
 module Logidze
   module Implementation
@@ -44,7 +44,7 @@ module Logidze
           end
 
           def function_paths
-            find_function_paths('pg')
+            find_function_paths("pg")
           end
         end
       end

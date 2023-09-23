@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative '../abstract/setting'
+require_relative "../abstract/setting"
 
 module Logidze
   module Implementation

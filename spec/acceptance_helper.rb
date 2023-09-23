@@ -4,7 +4,7 @@ require "spec_helper"
 
 require "digest/sha1"
 
-require_relative '../lib/logidze/implementation'
+require_relative "../lib/logidze/implementation"
 
 # For faster development, let's not re-create a database for every test run,
 # only if Logidze SQL has changed
@@ -21,13 +21,13 @@ module ConditionalDatabaseReset
     end
 
     def watched_files_patterns
-      adapter_name = Logidze::Implementation::adapter_name
+      adapter_name = Logidze::Implementation.adapter_name
       dir =
         case adapter_name
         when "postgresql"
-          'postgresql'
+          "postgresql"
         when "mysql2"
-          'mysql'
+          "mysql"
         else
           raise "not supported database #{adapter_name}"
         end

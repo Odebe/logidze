@@ -25,19 +25,19 @@ module Logidze
         private
 
         def function_paths
-          raise 'abstract method'
+          raise "abstract method"
         end
 
         def parse_definition(_)
-          raise 'abstract method'
+          raise "abstract method"
         end
 
         def parse_version(_)
-          raise 'abstract method'
+          raise "abstract method"
         end
 
         def from_db_query
-          raise 'abstract method'
+          raise "abstract method"
         end
 
         def find_function_paths(adapter)

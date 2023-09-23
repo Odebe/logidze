@@ -7,7 +7,7 @@ begin
 rescue LoadError # rubocop:disable Lint/HandleExceptions
 end
 
-require 'byebug'
+require "byebug"
 
 require "ammeter"
 require "timecop"

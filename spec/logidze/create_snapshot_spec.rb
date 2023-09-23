@@ -22,7 +22,7 @@ describe "create logidze snapshot", :db do
     end
   end
 
-  context 'with postgresql adapter', database: :postgresql do
+  context "with postgresql adapter", database: :postgresql do
     describe "#create_logidze_snapshot!" do
       specify "without arguments" do
         expect(user.log_data).to be_nil
@@ -34,11 +34,11 @@ describe "create logidze snapshot", :db do
         expect(Time.at(user.log_data.current_version.time / 1000) - now).to be > 1.year
         expect(user.log_data.current_version.changes)
           .to include({
-                        "name" => "test",
-                        "age" => 10,
-                        "active" => false,
-                        "extra" => '{"gender": "X"}'
-                      })
+            "name" => "test",
+            "age" => 10,
+            "active" => false,
+            "extra" => '{"gender": "X"}'
+          })
       end
 
       specify "timestamp column" do
@@ -89,7 +89,7 @@ describe "create logidze snapshot", :db do
     end
   end
 
-  context 'with mysql adapter', database: :mysql2 do
+  context "with mysql adapter", database: :mysql2 do
     describe "#create_logidze_snapshot!" do
       specify do
         expect { user.create_logidze_snapshot! }.to raise_error(Logidze::NotImplemented)

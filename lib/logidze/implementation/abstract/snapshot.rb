@@ -24,7 +24,7 @@ module Logidze
         private
 
         def process_scope
-          raise 'abstract method'
+          raise "abstract method"
         end
       end
     end
