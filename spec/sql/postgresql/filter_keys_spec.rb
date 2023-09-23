@@ -2,7 +2,7 @@
 
 require "acceptance_helper"
 
-describe "logidze_filter_keys" do
+describe "logidze_filter_keys", database: :postgresql do
   let(:data) { %q('{"title": "Feel me", "rating": 42, "name": "Jack"}'::jsonb) }
 
   specify "only filter" do

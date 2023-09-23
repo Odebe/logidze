@@ -2,7 +2,7 @@
 
 require "acceptance_helper"
 
-describe "logidze_snapshot" do
+describe "logidze_snapshot", database: :postgresql do
   let(:now) { Time.zone.local(1989, 7, 10, 18, 23, 33) }
 
   let(:data) { %('{"title": "Feel me", "rating": 42, "name": "Jack", "extra": {"gender": "X"}, "updated_at": "#{now.to_s(:db)}"}'::jsonb) }

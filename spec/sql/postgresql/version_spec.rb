@@ -2,7 +2,7 @@
 
 require "acceptance_helper"
 
-describe "logidze_version" do
+describe "logidze_version", database: :postgresql do
   let(:data) { %q('{"title": "Feel me", "rating": 42, "name": "Jack"}'::jsonb) }
 
   specify do
