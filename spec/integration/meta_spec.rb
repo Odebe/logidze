@@ -7,7 +7,12 @@ describe "logs metadata", :db do
 
   before(:all) do
     Dir.chdir("#{File.dirname(__FILE__)}/../dummy") do
-      successfully "rails generate logidze:model user --only-trigger --limit=5"
+      if mysql?
+        successfully "rails generate logidze:model user --only-trigger --limit=5 --only=name age active time"
+      else
+        successfully "rails generate logidze:model user --only-trigger --limit=5"
+      end
+
       successfully "rake db:migrate"
 
       # Close active connections to handle db variables
@@ -214,12 +219,24 @@ describe "logs metadata", :db do
       context "with Rails touch:true" do
         let!(:article) { Article.create!(title: "test", user: user) }
 
-        it "updating a record updates the parent record's log_data with the correct meta" do
-          Logidze.with_meta(meta, transactional: false) do
-            article.touch(time: 1.minute.since)
-          end
+        context 'with postgesql', database: :postgresql do
+          it "updating a record updates the parent record's log_data with the correct meta" do
+            Logidze.with_meta(meta, transactional: false) do
+              article.touch(time: 1.minute.since)
+            end
 
-          expect(user.reload.log_data.meta).to eq(meta)
+            expect(user.reload.log_data.meta).to eq(meta)
+          end
+        end
+
+        context 'with mysql', database: :mysql2 do
+          it "does not updating a record updates the parent record's log_data with the correct meta" do
+            Logidze.with_meta(meta, transactional: false) do
+              article.touch(time: 1.minute.since)
+            end
+
+            expect(user.reload.log_data.meta).to eq(nil)
+          end
         end
       end
     end

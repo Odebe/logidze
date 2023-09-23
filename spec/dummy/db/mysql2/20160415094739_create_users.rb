@@ -7,7 +7,7 @@ class CreateUsers < ActiveRecord::Migration[5.0]
       t.integer :age
       t.boolean :active
       t.json :extra
-      t.string :settings, array: true
+      t.json :settings
       t.json :log_data
       t.timestamp :time
     end

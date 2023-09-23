@@ -15,10 +15,17 @@ describe "columns filtering", :db do
 
     before(:all) do
       @except = %w[updated_at created_at active]
+      @only = %w[title rating active meta data]
 
       Dir.chdir("#{File.dirname(__FILE__)}/../dummy") do
-        successfully "rails generate logidze:model post " \
-                     "--except=#{@except.join(" ")}"
+        if mysql?
+          successfully "rails generate logidze:model post " \
+                       "--only=#{@only.join(" ")}"
+        else
+          successfully "rails generate logidze:model post " \
+                       "--except=#{@except.join(" ")}"
+        end
+
         successfully "rake db:migrate"
 
         # Close active connections to handle db variables
@@ -141,7 +148,7 @@ describe "columns filtering", :db do
 
     let(:params) { {title: "Triggers", rating: 10, active: false} }
 
-    it "logs with new params", :aggregate_failures do
+    it "logs with new params", :aggregate_failures, database: :postgresql do
       post = Post.create!(params).reload
 
       changes = post.log_data.current_version.changes

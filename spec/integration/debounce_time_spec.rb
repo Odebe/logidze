@@ -2,7 +2,7 @@
 
 require "acceptance_helper"
 
-describe "trigger debounce", :db do
+describe "trigger debounce", :db, database: :postgresql do
   include_context "cleanup migrations"
 
   before(:all) do

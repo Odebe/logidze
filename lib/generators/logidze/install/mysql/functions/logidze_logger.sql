@@ -66,7 +66,7 @@ BEGIN
         SET log_data = JSON_SET(log_data, '$.v', new_v);
         SET history_size = JSON_LENGTH(log_data, '$.h');
 
-        IF history_limit IS NOT NULL AND history_limit <= history_size THEN
+        IF history_limit IS NOT NULL AND history_limit < history_size THEN
             SET log_data = logidze_compact_history(log_data, history_size - history_limit);
         END IF;
     END IF;

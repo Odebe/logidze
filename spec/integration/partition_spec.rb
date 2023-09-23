@@ -2,7 +2,7 @@
 
 require "acceptance_helper"
 
-describe "partition change", :db do
+describe "partition change", :db, database: :postgresql do
   context "partitioned by age" do
     include_context "cleanup migrations"
 
