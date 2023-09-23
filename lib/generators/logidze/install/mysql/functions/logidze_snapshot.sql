@@ -18,7 +18,7 @@ BEGIN
             SET version_content = JSON_REPLACE(
                 version_content,
                 current_key_path,
-                JSON_UNQUOTE(JSON_EXTRACT(version_content, current_key_path))
+                CAST(JSON_UNQUOTE(JSON_EXTRACT(version_content, current_key_path)) AS json)
             );
         END IF;
 
