@@ -55,9 +55,6 @@ jobs:
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
-      - name: Prepare database.yml
-        run: |
-          bundle exec rake install_database_yml
       - name: Prepare test database
         run: |
           bundle exec rake dummy:db:create
