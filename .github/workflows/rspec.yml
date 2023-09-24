@@ -59,7 +59,6 @@ jobs:
         run: |
           echo ${MYSQL_URL}
           cat spec/dummy/config/database.yml
-      - name: Run RSpec (unit, integrations)
       - name: Prepare test database
         run: |
           bundle exec rake dummy:db:create
