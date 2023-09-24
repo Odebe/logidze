@@ -64,7 +64,8 @@ BEGIN
             RETURN null; -- pass
         END IF;
 
-        SET new_v = CAST(JSON_EXTRACT(log_data, '$.h[last].v') AS unsigned) + 1;
+        SET last_history_elem_path = CONCAT('$.h[', JSON_LENGTH(log_data, '$.h') - 1, ']');
+        SET new_v = CAST(JSON_EXTRACT(log_data, last_history_elem_path) AS unsigned) + 1;
         SET version = logidze_version(new_v, changes, ts);
         SET log_data = JSON_ARRAY_APPEND(log_data, '$.h', version);
         SET log_data = JSON_SET(log_data, '$.v', new_v);
