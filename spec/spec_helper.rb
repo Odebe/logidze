@@ -21,15 +21,6 @@ end
 require "ammeter"
 require "timecop"
 
-Dir.chdir("#{File.dirname(__FILE__)}/dummy") do
-  ::FileUtils.rm("config/database.yml", force: true)
-
-  FileUtils.cp(
-    "config/database.#{ENV["DB"]}.yml",
-    "config/database.yml"
-  )
-end
-
 require File.expand_path("dummy/config/environment", __dir__)
 
 Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].sort.each { |f| require f }

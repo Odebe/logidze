@@ -14,7 +14,8 @@ jobs:
       BUNDLE_RETRY: 3
       CI: true
       RAILS_ENV: test
-      DATABASE_URL: mysql://root:mysql@localhost:3306
+      DATABASE_URL: mysql2://root:mysql@localhost:3306
+      DB: mysql
     strategy:
       fail-fast: false
       matrix:
@@ -49,6 +50,9 @@ jobs:
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
+      - name: Prepare database.yml
+        run: |
+          bundle exec rake install_database_yml
       - name: Prepare test database
         run: |
           bundle exec rake dummy:db:create
