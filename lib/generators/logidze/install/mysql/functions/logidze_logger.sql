@@ -16,8 +16,7 @@ BEGIN
     DECLARE last_history_elem_path text;
 
 --  TODO: add exception handler
-    IF NULLIF(JSON_UNQUOTE(JSON_EXTRACT(new, '$.log_data')), 'null') IS NULL OR
-        JSON_EXTRACT(new, '$.log_data') = JSON_OBJECT()
+    IF NULLIF(JSON_UNQUOTE(JSON_EXTRACT(new, '$.log_data')), 'null') IS NULL OR JSON_LENGTH(new, '$.log_data') = 0
     THEN
         SET log_data = logidze_snapshot(new, columns);
     ELSE
@@ -32,14 +31,14 @@ BEGIN
 
         SET changes = JSON_REMOVE(new, '$.log_data');
         SET full_snapshot = COALESCE(@logidze.full_snapshot, '') = 'on' OR trigger_type = 'INSERT';
-        SET current_version = CAST(JSON_EXTRACT(log_data, '$.v') AS unsigned);
+        SET current_version = CAST(NULLIF(JSON_EXTRACT(log_data, '$.v'), 0) AS unsigned);
         SET last_history_elem_path = CONCAT('$.h[', JSON_LENGTH(log_data, '$.h') - 1, ']');
 
-        IF current_version < CAST(JSON_EXTRACT(log_data, CONCAT(last_history_elem_path, '.v')) AS unsigned) THEN
+        IF current_version < CAST(NULLIF(JSON_EXTRACT(log_data, CONCAT(last_history_elem_path, '.v')), 0) AS unsigned) THEN
             removing_newer_versions: LOOP
                 SET last_history_elem_path = CONCAT('$.h[', JSON_LENGTH(log_data, '$.h') - 1, ']');
 
-                IF current_version < CAST(JSON_EXTRACT(log_data, CONCAT(last_history_elem_path, '.v')) AS unsigned) THEN
+                IF current_version < CAST(NULLIF(JSON_EXTRACT(log_data, CONCAT(last_history_elem_path, '.v')), 0) AS unsigned) THEN
                     SET log_data = JSON_REMOVE(log_data, last_history_elem_path);
                 ELSE
                     LEAVE removing_newer_versions;
@@ -65,7 +64,7 @@ BEGIN
         END IF;
 
         SET last_history_elem_path = CONCAT('$.h[', JSON_LENGTH(log_data, '$.h') - 1, ']');
-        SET new_v = CAST(JSON_EXTRACT(log_data, last_history_elem_path) AS unsigned) + 1;
+        SET new_v = CAST(NULLIF(JSON_EXTRACT(log_data, CONCAT(last_history_elem_path, '.v')), 0) AS unsigned) + 1;
         SET version = logidze_version(new_v, changes, ts);
         SET log_data = JSON_ARRAY_APPEND(log_data, '$.h', version);
         SET log_data = JSON_SET(log_data, '$.v', new_v);
