@@ -37,11 +37,16 @@ end
 if AFTER_TRIGGER
   require "generators/logidze/model/model_generator"
 
-  Logidze::Generators::ModelGenerator.class_eval do
-    def after_trigger?
-      return options[:after_trigger] unless options[:after_trigger].nil?
+  [
+    Logidze::Generators::Pg::ModelGenerator,
+    Logidze::Generators::Mysql::ModelGenerator
+  ].each do |generator|
+    generator.class_eval do
+      def after_trigger?
+        return options[:after_trigger] unless options[:after_trigger].nil?
 
-      true
+        true
+      end
     end
   end
 end
