@@ -16,7 +16,7 @@ module Logidze
 
             file = File.open(path)
 
-            header, version_comment  = file.readline, file.readline
+            header, version_comment = file.readline, file.readline
 
             signature = parse_signature(header)
             version = parse_version(version_comment)
