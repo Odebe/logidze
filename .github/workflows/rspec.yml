@@ -27,8 +27,10 @@ jobs:
         include:
           - ruby: "3.2"
             gemfile: "gemfiles/railsmaster.gemfile"
+            mysql: "8"
           - ruby: "2.7"
             gemfile: "gemfiles/rails6.gemfile"
+            mysql: "8"
     services:
       mysql:
         image: mysql:${{ matrix.mysql }}
@@ -48,7 +50,7 @@ jobs:
       - name: Install system deps
         run: |
           sudo apt-get update
-          sudo apt-get -yqq install install libmysqlclient-dev
+          sudo apt-get -yqq install libmysqlclient-dev
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby }}
