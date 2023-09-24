@@ -2,6 +2,13 @@
 
 require File.expand_path("../boot", __FILE__)
 
+Dir.chdir("#{File.dirname(__FILE__)}") do
+  FileUtils.cp(
+    "./database.#{ENV["DB"]}.yml",
+    "./database.yml"
+  )
+end
+
 require "rails"
 require "action_controller/railtie"
 require "active_record/railtie"

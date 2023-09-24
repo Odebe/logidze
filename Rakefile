@@ -11,18 +11,6 @@ end
 
 RSpec::Core::RakeTask.new(:spec)
 
-# https://github.com/paper-trail-gem/paper_trail/blob/master/Rakefile#L9
-desc "Copy the database.DB.yml per ENV['DB']"
-task :install_database_yml do
-  # postgres, mysql
-  puts format("installing database.yml for %s", ENV["DB"])
-
-  FileUtils.cp(
-    "spec/dummy/config/database.#{ENV['DB']}.yml",
-    "spec/dummy/config/database.yml"
-  )
-end
-
 namespace :dummy do
   require_relative "spec/dummy/config/application"
   Dummy::Application.load_tasks
