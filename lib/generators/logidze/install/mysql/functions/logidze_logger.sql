@@ -1,6 +1,7 @@
 CREATE FUNCTION logidze_logger(old json, new json, columns json, trigger_type text, history_limit integer) RETURNS json NO SQL
 BEGIN
     -- version: 1
+    DECLARE row_log_data json;
     DECLARE log_data json;
     DECLARE i integer DEFAULT 0;
     DECLARE history_size integer;
@@ -15,12 +16,13 @@ BEGIN
     DECLARE current_version integer unsigned;
     DECLARE last_history_elem_path text;
 
+    SET row_log_data = NULLIF(JSON_UNQUOTE(JSON_EXTRACT(new, '$.log_data')), 'null');
+
 --  TODO: add exception handler
-    IF NULLIF(JSON_UNQUOTE(JSON_EXTRACT(new, '$.log_data')), 'null') IS NULL OR JSON_LENGTH(new, '$.log_data') = 0
-    THEN
+    IF row_log_data IS NULL OR row_log_data = '{}' THEN
         SET log_data = logidze_snapshot(new, columns);
     ELSE
-        SET log_data = CAST(JSON_EXTRACT(new, '$.log_data') AS json);
+        SET log_data = row_log_data;
 
         IF trigger_type = 'UPDATE' AND (old = new) THEN
             RETURN null; -- pass
