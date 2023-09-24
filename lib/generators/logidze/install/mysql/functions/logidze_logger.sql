@@ -7,18 +7,20 @@ BEGIN
     DECLARE columns_count integer DEFAULT JSON_LENGTH(columns);
     DECLARE changes json;
     DECLARE version json;
-    DECLARE new_v integer;
+    DECLARE new_v integer unsigned;
     DECLARE ts timestamp;
     DECLARE current_key text;
     DECLARE current_key_path text;
     DECLARE full_snapshot boolean;
-    DECLARE current_version integer;
+    DECLARE current_version integer unsigned;
 
 --  TODO: add exception handler
-    IF JSON_VALUE(new, '$.log_data') IS NULL OR JSON_LENGTH(JSON_EXTRACT(new, '$.log_data')) = 0 THEN
+    IF NULLIF(JSON_UNQUOTE(JSON_EXTRACT(new, '$.log_data')), 'null') IS NULL OR
+        JSON_EXTRACT(new, '$.log_data') = JSON_OBJECT()
+    THEN
         SET log_data = logidze_snapshot(new, columns);
     ELSE
-        SET log_data = JSON_VALUE(new, '$.log_data');
+        SET log_data = CAST(JSON_EXTRACT(new, '$.log_data') AS json);
 
         IF trigger_type = 'UPDATE' AND (old = new) THEN
             RETURN null; -- pass
@@ -29,11 +31,11 @@ BEGIN
 
         SET changes = JSON_REMOVE(new, '$.log_data');
         SET full_snapshot = COALESCE(@logidze.full_snapshot, '') = 'on' OR trigger_type = 'INSERT';
-        SET current_version = JSON_VALUE(log_data, '$.v');
+        SET current_version = CAST(JSON_EXTRACT(log_data, '$.v') AS unsigned);
 
-        IF current_version < JSON_VALUE(log_data, '$.h[last].v') THEN
+        IF current_version < CAST(JSON_EXTRACT(log_data, '$.h[last].v') AS unsigned) THEN
             removing_newer_versions: LOOP
-                IF current_version < JSON_VALUE(log_data, '$.h[last].v') THEN
+                IF current_version < CAST(JSON_EXTRACT(log_data, '$.h[last].v') AS unsigned) THEN
                     SET log_data = JSON_REMOVE(log_data, '$.h[last]');
                 ELSE
                     LEAVE removing_newer_versions;
@@ -41,8 +43,6 @@ BEGIN
             END LOOP removing_newer_versions;
         END IF;
 
--- TODO: if JSON_VALUE(log_data, '$.v') < JSON_VALUE(log_data, '$.h[last].v')
--- TODO:    remove versions with number greater or equal than JSON_VALUE(log_data, '$.v')
         IF full_snapshot <> TRUE THEN
             WHILE i < columns_count DO
                 SET current_key = JSON_EXTRACT(columns, CONCAT('$[', i, ']'));
@@ -60,7 +60,7 @@ BEGIN
             RETURN null; -- pass
         END IF;
 
-        SET new_v = JSON_VALUE(log_data, '$.h[last].v' RETURNING unsigned) + 1;
+        SET new_v = CAST(JSON_EXTRACT(log_data, '$.h[last].v') AS unsigned) + 1;
         SET version = logidze_version(new_v, changes, ts);
         SET log_data = JSON_ARRAY_APPEND(log_data, '$.h', version);
         SET log_data = JSON_SET(log_data, '$.v', new_v);
