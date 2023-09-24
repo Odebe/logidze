@@ -6,10 +6,10 @@ module Logidze
   module Generators
     module AdapterHelper
       def db_subtask_name
-        self.class::REGISTRY.fetch(adapter_name) { raise "Not supported database '#{adapter_name}'" }
+        self.class::REGISTRY.fetch(database_type) { raise "Not supported database '#{database_type}'" }
       end
 
-      def adapter_name
+      def database_type
         Logidze::Implementation.database_type
       end
     end

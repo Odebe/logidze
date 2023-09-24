@@ -5,7 +5,7 @@ require "logidze/implementation"
 module Logidze
   module DbSelectionHelpers # :nodoc:
     def current_db_adapter
-      Logidze::Implementation.adapter_name
+      Logidze::Implementation.database_type
     end
 
     def postgresql?
