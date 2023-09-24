@@ -55,9 +55,9 @@ jobs:
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
-      - name: Prepare test database
+      - name: Prepare test database user
         run: |
-          bundle exec rake dummy:db:create
+          mysql -h0.0.0.0 -uroot -plogidze_test -e "GRANT SUPER ON logidze_test.* TO rails";
       - name: Run RSpec (unit, integrations)
         run: |
           bundle exec rspec --exclude-pattern=spec/acceptance/**/* -f d --force-color
