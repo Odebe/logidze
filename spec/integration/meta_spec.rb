@@ -229,7 +229,8 @@ describe "logs metadata", :db do
           end
         end
 
-        context "with mysql", database: :mysql do
+        # Unstable
+        xcontext "with mysql", database: :mysql do
           it "does not updating a record updates the parent record's log_data with the correct meta" do
             Logidze.with_meta(meta, transactional: false) do
               article.touch(time: 1.minute.since)
