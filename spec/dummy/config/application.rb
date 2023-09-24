@@ -2,7 +2,7 @@
 
 require File.expand_path("../boot", __FILE__)
 
-require 'fileutils'
+require "fileutils"
 
 Dir.chdir(File.dirname(__FILE__)) do
   FileUtils.cp(
