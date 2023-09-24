@@ -32,9 +32,7 @@ module Logidze
           def within_setting
             db_set_setting_param
 
-            yield
-          ensure
-            db_clear_setting_param
+            yield.tap { db_clear_setting_param }
           end
 
           def within_transaction
