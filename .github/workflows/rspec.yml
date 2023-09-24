@@ -76,7 +76,7 @@ jobs:
       CI: true
       RAILS_ENV: test
       DATABASE_URL: postgres://postgres:postgres@localhost:5432
-      DB: postgres
+      DB: postgresql
     strategy:
       fail-fast: false
       matrix:
