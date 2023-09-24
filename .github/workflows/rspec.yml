@@ -69,7 +69,6 @@ jobs:
           bundle exec rspec spec/acceptance/ -f d --force-color
 
   rspec:
-    if: false
     runs-on: ubuntu-latest
     env:
       BUNDLE_JOBS: 4
@@ -77,6 +76,7 @@ jobs:
       CI: true
       RAILS_ENV: test
       DATABASE_URL: postgres://postgres:postgres@localhost:5432
+      DB: postgres
     strategy:
       fail-fast: false
       matrix:
