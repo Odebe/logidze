@@ -57,7 +57,7 @@ jobs:
           bundler-cache: true
       - name: Prepare test database user
         run: |
-          mysql -h0.0.0.0 -uroot -proot -e "GRANT SUPER ON *.* TO rails";
+          mysql -h0.0.0.0 -uroot -proot -e "GRANT SUPER ON *.* TO rails; FLUSH PRIVILEGES;"
       - name: Run RSpec (unit, integrations)
         run: |
           bundle exec rspec --exclude-pattern=spec/acceptance/**/* -f d --force-color
