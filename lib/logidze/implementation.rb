@@ -7,19 +7,20 @@ module Logidze
         @adapter_name ||=
           begin
             base = ActiveRecord::Base
+            config =
+              if base.respond_to?(:connection_db_config)
+                # 6.1 <= Rails
+                base.connection_db_config[:config]
+              elsif base.respond_to?(:configurations)
+                # 4.1.8 <= Rails < 6.1
+                base.configurations[Rails.env]
+              else
+                raise Logidze::CantDefineDatabase
+              end
 
-            if base.respond_to?(:connection_db_config)
-              # Rails >= 6.1
-              base.connection_db_config[:config][:adapter]
-            elsif base.respond_to?(:connection_config)
-              # Rails < 6.1
-              base.establish_connection
-              # TODO: maybe close connection
-              base.connection_config[:adapter]
-            else
-              # TODO
-              raise "Can't define database adapter name"
-            end
+            raise Logidze::NoConfigForCurrentEnvError, "No database configuration for #{Rails.env}" unless config
+
+            config.with_indifferent_access[:adapter]
           end
       end
 
