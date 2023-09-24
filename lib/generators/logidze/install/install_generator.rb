@@ -15,7 +15,7 @@ module Logidze
 
       REGISTRY = {
         "postgresql" => "logidze:pg:install",
-        "mysql2" => "logidze:mysql:install"
+        "mysql" => "logidze:mysql:install"
       }.freeze
 
       def select_and_call_generator

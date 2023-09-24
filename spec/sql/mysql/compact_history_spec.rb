@@ -2,7 +2,7 @@
 
 require "acceptance_helper"
 
-describe "logidze_compact_history", database: :mysql2 do
+describe "logidze_compact_history", database: :mysql do
   let(:data) do
     %('
       {

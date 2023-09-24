@@ -34,7 +34,7 @@ describe Logidze::Utils::FunctionDefinitions do
     end
   end
 
-  context "with mysql adapter", database: :mysql2 do
+  context "with mysql adapter", database: :mysql do
     describe ".from_fs" do
       subject { described_class.from_fs }
 

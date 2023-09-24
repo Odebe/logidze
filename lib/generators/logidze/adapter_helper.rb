@@ -10,7 +10,7 @@ module Logidze
       end
 
       def adapter_name
-        Logidze::Implementation.adapter_name
+        Logidze::Implementation.database_type
       end
     end
   end

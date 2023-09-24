@@ -3,7 +3,7 @@
 require "spec_helper"
 require "generators/logidze/install/install_generator"
 
-describe Logidze::Generators::InstallGenerator, type: :generator, database: :mysql2 do
+describe Logidze::Generators::InstallGenerator, type: :generator, database: :mysql do
   destination File.expand_path("../../../tmp", __dir__)
 
   let(:use_fx_args) { USE_FX ? [] : ["--fx"] }

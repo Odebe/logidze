@@ -2,7 +2,7 @@
 
 require "acceptance_helper"
 
-describe "logidze_version", database: :mysql2 do
+describe "logidze_version", database: :mysql do
   let(:data) { %q(JSON_UNQUOTE('{"title": "Feel me", "rating": 42, "name": "Jack"}')) }
 
   specify do

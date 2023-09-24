@@ -2,7 +2,7 @@
 
 require "acceptance_helper"
 
-describe "logidze_snapshot", database: :mysql2 do
+describe "logidze_snapshot", database: :mysql do
   let(:now) { Time.zone.local(1989, 7, 10, 18, 23, 33) }
 
   let(:data) { %(JSON_UNQUOTE('{"title": "Feel me", "rating": 42, "name": "Jack", "extra": {"gender": "X"}, "updated_at": "#{now.to_s(:db)}"}')) }

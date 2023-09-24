@@ -3,12 +3,12 @@
 module Logidze
   module Implementation
     current =
-      case adapter_name
+      case database_type
       when "postgresql"
         require_relative "pg"
 
         Implementation::Pg
-      when "mysql2", "mysql"
+      when "mysql"
         require_relative "mysql"
 
         Implementation::Mysql

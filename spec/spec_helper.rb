@@ -2,6 +2,17 @@
 
 ENV["RAILS_ENV"] = "test"
 
+ENV["DB"] ||= ENV.fetch("DATABASE_URL").split(":").first
+ENV["DB"] =
+  case ENV["DB"]
+  when "mysql2"
+    "mysql"
+  when "postgres"
+    "postgresql"
+  else
+    ENV["DB"]
+  end
+
 begin
   require "debug" unless ENV["CI"] == "true"
 rescue LoadError # rubocop:disable Lint/HandleExceptions
@@ -12,6 +23,15 @@ require "byebug"
 require "ammeter"
 require "timecop"
 
+Dir.chdir("#{File.dirname(__FILE__)}/dummy") do
+  ::FileUtils.rm("config/database.yml", force: true)
+
+  FileUtils.cp(
+    "config/database.#{ENV["DB"]}.yml",
+    "config/database.yml"
+  )
+end
+
 require File.expand_path("dummy/config/environment", __dir__)
 
 Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].sort.each { |f| require f }
@@ -21,7 +41,7 @@ RSpec.configure do |config|
     mocks.verify_partial_doubles = true
   end
 
-  config.filter_run_excluding database: ->(name) { name.to_s != Logidze::Implementation.adapter_name }
+  config.filter_run_excluding database: ->(name) { name.to_s != ENV["DB"] }
 
   config.example_status_persistence_file_path = "tmp/rspec_examples.txt"
   config.filter_run :focus

@@ -13,7 +13,7 @@ module Logidze
     end
 
     def mysql?
-      current_db_adapter == "mysql2"
+      current_db_adapter == "mysql"
     end
   end
 end

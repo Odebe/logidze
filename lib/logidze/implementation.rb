@@ -2,7 +2,7 @@
 
 module Logidze
   module Implementation
-    Current = nil
+    Current = nil # rubocop: disable Naming/ConstantName
 
     class << self
       def adapter_name
@@ -22,6 +22,16 @@ module Logidze
               # TODO
               raise "Can't define database adapter name"
             end
+          end
+      end
+
+      def database_type
+        @database_name ||=
+          case adapter_name
+          when "mysql2"
+            "mysql"
+          else
+            adapter_name
           end
       end
     end

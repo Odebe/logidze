@@ -6,8 +6,6 @@ require "rails"
 require "action_controller/railtie"
 require "active_record/railtie"
 
-require "logidze/implementation"
-
 Bundler.require(*Rails.groups)
 
 # Conditionally load fx
@@ -43,7 +41,7 @@ module Dummy
   class Application < Rails::Application
     config.eager_load = false
 
-    config.paths["db/migrate"] << "db/#{Logidze::Implementation.adapter_name}"
+    config.paths["db/migrate"] << "db/#{ENV["DB"]}"
 
     if TABLE_NAME_PREFIX
       $stdout.puts "🔩 Using table_name_prefix = '#{TABLE_NAME_PREFIX}'"

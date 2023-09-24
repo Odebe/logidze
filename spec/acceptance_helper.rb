@@ -4,8 +4,6 @@ require "spec_helper"
 
 require "digest/sha1"
 
-require_relative "../lib/logidze/implementation"
-
 # For faster development, let's not re-create a database for every test run,
 # only if Logidze SQL has changed
 #
@@ -21,20 +19,9 @@ module ConditionalDatabaseReset
     end
 
     def watched_files_patterns
-      adapter_name = Logidze::Implementation.adapter_name
-      dir =
-        case adapter_name
-        when "postgresql"
-          "postgresql"
-        when "mysql2"
-          "mysql"
-        else
-          raise "not supported database #{adapter_name}"
-        end
-
       [
-        File.join(__dir__, "../../..", "generators/logidze/install/#{dir}/functions/*.sql"),
-        File.join(__dir__, "../../..", "generators/logidze/install/#{dir}/templates/*")
+        File.join(__dir__, "../../..", "generators/logidze/install/#{ENV["DB"]}/functions/*.sql"),
+        File.join(__dir__, "../../..", "generators/logidze/install/#{ENV["DB"]}/templates/*")
       ]
     end
 
@@ -82,13 +69,6 @@ RSpec.configure do |config|
         start = Time.now
 
         ActiveRecord::Base.connection_pool.disconnect!
-
-        ::FileUtils.rm("db/database.yml", force: true)
-
-        FileUtils.cp(
-          "config/database.#{Logidze::Implementation.adapter_name}.yml",
-          "config/database.yml"
-        )
 
         $stdout.print "⌛️  Creating database and installing Logidze... "
 

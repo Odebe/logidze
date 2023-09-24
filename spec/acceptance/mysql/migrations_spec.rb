@@ -2,7 +2,7 @@
 
 require "acceptance_helper"
 
-describe "Logidze migrations", database: :mysql2 do
+describe "Logidze migrations", database: :mysql do
   describe "#install" do
     let(:check_logidze_command) do
       <<~RUBY.strip

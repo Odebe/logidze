@@ -89,7 +89,7 @@ describe "create logidze snapshot", :db do
     end
   end
 
-  context "with mysql adapter", database: :mysql2 do
+  context "with mysql adapter", database: :mysql do
     describe "#create_logidze_snapshot!" do
       specify do
         expect { user.create_logidze_snapshot! }.to raise_error(Logidze::NotImplemented)
