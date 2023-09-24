@@ -24,7 +24,7 @@ module Logidze
           columns = opts[:only] || opts[:except]
 
           if columns
-            args[1] = "'{#{opts[:columns].join(",")}}'"
+            args[1] = "'{#{columns.join(",")}}'"
             args[2] = opts[:only] ? "true" : "false"
           end
 
