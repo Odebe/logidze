@@ -1,11 +1,14 @@
 # frozen_string_literal: true
 
 require "logidze"
-require "logidze/utils/check_pending"
 
 module Logidze
   class Engine < Rails::Engine # :nodoc:
     config.logidze = Logidze
+
+    initializer "load Logidze implementation for database adapter" do |_app|
+      require "logidze/implementation/load"
+    end
 
     initializer "extend ActiveRecord with Logidze" do |_app|
       ActiveSupport.on_load(:active_record) do
@@ -14,6 +17,8 @@ module Logidze
     end
 
     initializer "check Logidze function versions" do |app|
+      require "logidze/utils/check_pending"
+
       if config.logidze.on_pending_upgrade != :ignore
         ActiveSupport.on_load(:active_record) do
           app.config.app_middleware.use Logidze::Utils::CheckPending

@@ -2,8 +2,6 @@
 
 module Logidze
   module Implementation
-    Current = nil # rubocop: disable Naming/ConstantName
-
     class << self
       def adapter_name
         @adapter_name ||=
@@ -37,5 +35,3 @@ module Logidze
     end
   end
 end
-
-require_relative "implementation/load"
