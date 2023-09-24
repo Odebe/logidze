@@ -13,6 +13,7 @@ BEGIN
     DECLARE current_key_path text;
     DECLARE full_snapshot boolean;
     DECLARE current_version integer unsigned;
+    DECLARE last_history_elem_path text;
 
 --  TODO: add exception handler
     IF NULLIF(JSON_UNQUOTE(JSON_EXTRACT(new, '$.log_data')), 'null') IS NULL OR
@@ -32,11 +33,14 @@ BEGIN
         SET changes = JSON_REMOVE(new, '$.log_data');
         SET full_snapshot = COALESCE(@logidze.full_snapshot, '') = 'on' OR trigger_type = 'INSERT';
         SET current_version = CAST(JSON_EXTRACT(log_data, '$.v') AS unsigned);
+        SET last_history_elem_path = CONCAT('$.h[', JSON_LENGTH(log_data, '$.h') - 1, ']');
 
-        IF current_version < CAST(JSON_EXTRACT(log_data, '$.h[last].v') AS unsigned) THEN
+        IF current_version < CAST(JSON_EXTRACT(log_data, CONCAT(last_history_elem_path, '.v')) AS unsigned) THEN
             removing_newer_versions: LOOP
-                IF current_version < CAST(JSON_EXTRACT(log_data, '$.h[last].v') AS unsigned) THEN
-                    SET log_data = JSON_REMOVE(log_data, '$.h[last]');
+                SET last_history_elem_path = CONCAT('$.h[', JSON_LENGTH(log_data, '$.h') - 1, ']');
+
+                IF current_version < CAST(JSON_EXTRACT(log_data, CONCAT(last_history_elem_path, '.v')) AS unsigned) THEN
+                    SET log_data = JSON_REMOVE(log_data, last_history_elem_path);
                 ELSE
                     LEAVE removing_newer_versions;
                 END IF;
