@@ -7,7 +7,6 @@ module Logidze
     module Mysql
       module Setting
         class Wrapper < Abstract::Setting::Wrapper
-
           def within_setting
             db_set_setting_param
 
