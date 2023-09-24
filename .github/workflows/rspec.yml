@@ -14,7 +14,7 @@ jobs:
       BUNDLE_RETRY: 3
       CI: true
       RAILS_ENV: test
-      MYSQL_URL: mysql2://rails:rails@localhost:3306
+      MYSQL_URL: mysql2://rails:rails@127.0.0.1:3306
       DB: mysql
     strategy:
       fail-fast: false
