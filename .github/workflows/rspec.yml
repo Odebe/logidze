@@ -75,7 +75,7 @@ jobs:
       BUNDLE_RETRY: 3
       CI: true
       RAILS_ENV: test
-      DATABASE_URL: postgres://postgres:postgres@0.0.0.0:5432
+      POSTGRESQL_URL: postgres://postgres:postgres@0.0.0.0:5432
       DB: postgresql
     strategy:
       fail-fast: false
