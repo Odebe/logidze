@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 require "spec_helper"
-require "logidze/utils/function_definitions"
+require "logidze/implementation/current"
 
-describe Logidze::Utils::FunctionDefinitions do
+describe Logidze::Implementation::Current::FunctionDefinitions do
   context "with postgresql adapter", database: :postgresql do
     describe ".from_fs" do
       subject { described_class.from_fs }
@@ -61,6 +61,6 @@ describe Logidze::Utils::FunctionDefinitions do
   end
 
   def func_def(*params)
-    Logidze::Utils::FuncDef.new(*params)
+    Logidze::Implementation::Abstract::FunctionDefinitions::FuncDef.new(*params)
   end
 end

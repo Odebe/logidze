@@ -7,8 +7,8 @@ describe Logidze::Utils::CheckPending do
   subject { described_class.new(app) }
 
   before(:each) do
-    allow(Logidze::Utils::FunctionDefinitions).to receive(:from_fs).and_return(from_fs_result)
-    allow(Logidze::Utils::FunctionDefinitions).to receive(:from_db).and_return(from_db_result)
+    allow(Logidze::Implementation::Current::FunctionDefinitions).to receive(:from_fs).and_return(from_fs_result)
+    allow(Logidze::Implementation::Current::FunctionDefinitions).to receive(:from_db).and_return(from_db_result)
   end
 
   let(:app) { ->(_) {} }
@@ -29,15 +29,15 @@ describe Logidze::Utils::CheckPending do
       subject.call(env)
       subject.call(env)
 
-      expect(Logidze::Utils::FunctionDefinitions)
+      expect(Logidze::Implementation::Current::FunctionDefinitions)
         .to have_received(:from_fs).once
-      expect(Logidze::Utils::FunctionDefinitions)
+      expect(Logidze::Implementation::Current::FunctionDefinitions)
         .to have_received(:from_db).once
     end
   end
 
   context "when functions are outdated" do
-    let(:from_fs_result) { [Logidze::Utils::FuncDef.new(name: "func", version: 1)] }
+    let(:from_fs_result) { [Logidze::Implementation::Abstract::FunctionDefinitions::FuncDef.new(name: "func", version: 1)] }
     let(:from_db_result) { [] }
 
     context "when :warn option is set" do
@@ -57,9 +57,9 @@ describe Logidze::Utils::CheckPending do
         subject.call(env)
         subject.call(env)
 
-        expect(Logidze::Utils::FunctionDefinitions)
+        expect(Logidze::Implementation::Current::FunctionDefinitions)
           .to have_received(:from_fs).once
-        expect(Logidze::Utils::FunctionDefinitions)
+        expect(Logidze::Implementation::Current::FunctionDefinitions)
           .to have_received(:from_db).once
       end
     end
@@ -76,9 +76,9 @@ describe Logidze::Utils::CheckPending do
         expect { subject.call(env) }.to raise_error(Logidze::Utils::PendingMigrationError)
         expect { subject.call(env) }.to raise_error(Logidze::Utils::PendingMigrationError)
 
-        expect(Logidze::Utils::FunctionDefinitions)
+        expect(Logidze::Implementation::Current::FunctionDefinitions)
           .to have_received(:from_fs).once
-        expect(Logidze::Utils::FunctionDefinitions)
+        expect(Logidze::Implementation::Current::FunctionDefinitions)
           .to have_received(:from_db).twice
       end
     end
