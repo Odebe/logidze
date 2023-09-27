@@ -47,11 +47,16 @@ module Logidze
           desc: "Define whether this is an update migration"
 
         class_option :after_trigger, type: :boolean, optional: true,
-          desc: "Use after trigger"
+          desc: "Not implemented for MySQL"
 
         def generate_migration
           if options[:except]
             warn "MySQL does not supports --expect. Use --only"
+            exit(1)
+          end
+
+          if options[:after_trigger]
+            warn "MySQL does not supports --after_trigger."
             exit(1)
           end
 
