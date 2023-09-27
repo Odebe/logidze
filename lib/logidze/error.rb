@@ -12,5 +12,5 @@ module Logidze
   # Raises when app loaded without current env database config
   class NoConfigForCurrentEnvError < ImplementationSelectionError; end
 
-  class CantDefineDatabase < ImplementationSelectionError; end
+  class CannotIdentifyDatabase < ImplementationSelectionError; end
 end

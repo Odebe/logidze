@@ -15,7 +15,7 @@ module Logidze
                 # 4.1.8 <= Rails < 6.1
                 base.configurations[Rails.env]
               else
-                raise Logidze::CantDefineDatabase
+                raise Logidze::CannotIdentifyDatabase
               end
 
             raise Logidze::NoConfigForCurrentEnvError, "No database configuration for #{Rails.env}" unless config
