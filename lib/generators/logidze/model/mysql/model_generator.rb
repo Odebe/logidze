@@ -148,6 +148,12 @@ module Logidze
 
             "'#{string}'"
           end
+
+          def backticks(string)
+            return if string.blank?
+
+            "`#{string}`"
+          end
         end
 
         private
