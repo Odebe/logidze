@@ -55,7 +55,7 @@ module Dummy
   class Application < Rails::Application
     config.eager_load = false
 
-    config.paths["db/migrate"] << "db/#{ENV["DB"]}"
+    config.autoload_paths += Dir["db/concerns/**/"]
 
     if TABLE_NAME_PREFIX
       $stdout.puts "🔩 Using table_name_prefix = '#{TABLE_NAME_PREFIX}'"

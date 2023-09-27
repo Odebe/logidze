@@ -1,7 +1,11 @@
 # frozen_string_literal: true
 
 class CreatePartitionedUsers < ActiveRecord::Migration[5.0]
+  include DatabaseHelpers
+
   def up
+    return unless postgresql?
+
     pg_version = execute("SELECT current_setting('server_version_num')::int;").values.first.first
     return if pg_version < 11_00_00
 
@@ -28,6 +32,8 @@ class CreatePartitionedUsers < ActiveRecord::Migration[5.0]
   end
 
   def down
+    return unless postgresql?
+
     execute <<~SQL
       DROP TABLE IF EXISTS partitioned_users CASCADE;
     SQL
