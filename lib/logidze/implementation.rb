@@ -27,7 +27,7 @@ module Logidze
       def database_type
         @database_name ||=
           case adapter_name
-          when "mysql2"
+          when "mysql2", "trilogy"
             "mysql"
           else
             adapter_name

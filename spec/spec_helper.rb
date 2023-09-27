@@ -5,7 +5,7 @@ ENV["RAILS_ENV"] = "test"
 ENV["DB"] ||= ENV.fetch("DATABASE_URL").split(":").first
 ENV["DB"] =
   case ENV["DB"]
-  when "mysql2"
+  when "mysql2", "trilogy"
     "mysql"
   when "postgres"
     "postgresql"
