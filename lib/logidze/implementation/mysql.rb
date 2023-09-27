@@ -2,7 +2,7 @@
 
 module Logidze
   module Implementation
-    module Mysl
+    module Mysql
     end
   end
 end
