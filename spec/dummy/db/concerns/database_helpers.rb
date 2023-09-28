@@ -9,7 +9,7 @@ module DatabaseHelpers
     end
 
     def mysql?
-      ENV["DB"] == 'mysql'
+      ENV["DB"] == "mysql"
     end
   end
 end
