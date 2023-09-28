@@ -4,40 +4,60 @@ class <%= @migration_class_name %> < ActiveRecord::Migration[<%= ActiveRecord::M
     add_column :<%= table_name %>, :log_data, :json
 <%- end -%>
 
+<%- if fx? -%>
+  <%- if previous_version -%>
+    <%- trigger_names.each do |trigger_name| %>
+    update_trigger :<%= trigger_name %>, on: :<%= table_name %>, version: <%= next_version %>, revert_to_version: <%= previous_version %>
+    <%- end %>
+  <%- else -%>
     reversible do |dir|
       dir.up do
-  <%- if update? -%>
-        execute <<~SQL
-          DROP TRIGGER IF EXISTS logidze_before_insert_on_<%= full_table_name %>;
-        SQL
-        execute <<~SQL
-          DROP TRIGGER IF EXISTS logidze_before_update_on_<%= full_table_name %>;
-        SQL
-
-  <%- end -%>
-        execute <<~SQL
-<%= inject_sql("logidze_update.sql", indent: 10) %>
-        SQL
-        execute <<~SQL
-<%= inject_sql("logidze_insert.sql", indent: 10) %>
-        SQL
+      <%- trigger_names.each do |trigger_name| %>
+        create_trigger :<%= trigger_name %>, on: :<%= table_name %>
+      <%- end %>
       end
 
       dir.down do
+      <%- trigger_names.each do |trigger_name| %>
         execute <<~SQL
-          DROP TRIGGER IF EXISTS logidze_before_insert_on_<%= full_table_name %>;
+          DROP TRIGGER IF EXISTS <%= backticks(trigger_name) %>;
         SQL
-        execute <<~SQL
-          DROP TRIGGER IF EXISTS logidze_before_update_on_<%= full_table_name %>;
-        SQL
+      <%- end %>
       end
     end
+  <%- end -%>
+<%- else -%>
+    reversible do |dir|
+      dir.up do
+  <%- if update? -%>
+      <%- trigger_names.each do |trigger_name| %>
+        execute <<~SQL
+          DROP TRIGGER IF EXISTS <%= backticks(trigger_name) %>;
+        SQL
+      <%- end %>
+  <%- end -%>
+      <%- trigger_files.each do |trigger_file| %>
+        execute <<~SQL
+<%= inject_sql(trigger_file, indent: 10) %>
+        SQL
+      <%- end %>
+      end
+
+      dir.down do
+      <%- trigger_names.each do |trigger_name| %>
+        execute <<~SQL
+          DROP TRIGGER IF EXISTS <%= backticks(trigger_name) %>;
+        SQL
+      <%- end %>
+      end
+    end
+<%- end -%>
 <%- if backfill? -%>
 
     reversible do |dir|
       dir.up do
         execute <<~SQL
-          UPDATE <%= full_table_name %> as t
+          UPDATE <%= backticks(full_table_name) %> as t
           SET log_data = logidze_snapshot(
               <%= json_object(table_fields('t', filtered_columns)) %>,
               <%= columns_json %>

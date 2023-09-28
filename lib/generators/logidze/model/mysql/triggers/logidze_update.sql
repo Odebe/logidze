@@ -1,4 +1,4 @@
-CREATE TRIGGER <%= backticks("logidze_before_update_on_#{full_table_name}") %>
+CREATE TRIGGER <%= backticks(trigger_name('update')) %>
 BEFORE UPDATE ON <%= backticks(full_table_name) %> FOR EACH ROW
 BEGIN
     DECLARE new_j json;

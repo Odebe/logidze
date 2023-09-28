@@ -26,7 +26,7 @@ module Logidze
           desc: "Specify history size limit"
 
         class_option :debounce_time, type: :numeric, optional: true,
-          desc: "Specify debounce time in millisecond"
+          desc: "Not implemented for MySQL"
 
         class_option :backfill, type: :boolean, optional: true,
           desc: "Add query to backfill existing records history"
@@ -56,11 +56,24 @@ module Logidze
           end
 
           if options[:after_trigger]
-            warn "MySQL does not supports --after_trigger."
+            warn "--after_trigger is not implemented for MySQL"
+            exit(1)
+          end
+
+          if options[:debounce_time]
+            warn "--debounce_time is not implemented for MySQL"
             exit(1)
           end
 
           migration_template "migration.rb.erb", "db/migrate/#{migration_name}.rb"
+        end
+
+        def generate_fx_trigger
+          return unless fx?
+
+          all_triggers.each do |trigger_name, template_file|
+            template template_file, "db/triggers/#{trigger_name}_v#{next_version.to_s.rjust(2, "0")}.sql"
+          end
         end
 
         def inject_logidze_to_model
@@ -72,6 +85,28 @@ module Logidze
         end
 
         no_tasks do
+          def trigger_names
+            all_triggers.keys
+          end
+
+          def trigger_files
+            all_triggers.values
+          end
+
+          def all_triggers
+            @all_triggers ||= trigger_actions.each_with_object({}) do |action, acc|
+              acc[trigger_name(action)] = "logidze_#{action}.sql"
+            end
+          end
+
+          def trigger_actions
+            %w[insert update]
+          end
+
+          def trigger_name(action)
+            "logidze_before_#{action}_on_#{full_table_name}"
+          end
+
           def migration_name
             return options[:name] if options[:name].present?
 
@@ -101,6 +136,35 @@ module Logidze
 
           def update?
             options[:update]
+          end
+
+          def previous_version
+            @previous_version ||=
+              triggers_from_fs
+                .filter_map do |path|
+                  Regexp.last_match[1].to_i if path =~ %r{logidze_on_#{table_name}_v(\d+).sql}
+                end
+                .max
+          end
+
+          def next_version
+            previous_version&.next || 1
+          end
+
+          def triggers_from_fs
+            @triggers_from_fs ||=
+              begin
+                res = nil
+                in_root do
+                  res =
+                    if File.directory?("db/triggers")
+                      Dir.entries("db/triggers")
+                    else
+                      []
+                    end
+                end
+                res
+              end
           end
 
           def logidze_logger_parameters(trigger_type)
