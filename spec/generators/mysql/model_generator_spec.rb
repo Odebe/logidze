@@ -195,24 +195,6 @@ describe Logidze::Generators::ModelGenerator, type: :generator, database: :mysql
           end
         end
       end
-
-      context "with timestamp_column" do
-        context "custom column name" do
-          let(:base_args) { ["user", "--timestamp_column", "time", "--no-after-trigger"] }
-
-          it "creates trigger with 'time' timestamp column" do
-            is_expected.to exist
-          end
-        end
-
-        context "nil" do
-          let(:base_args) { ["user", "--timestamp_column", "nil", "--no-after-trigger"] }
-
-          it "creates trigger without timestamp column" do
-            is_expected.to exist
-          end
-        end
-      end
     end
 
     context "with namespace" do

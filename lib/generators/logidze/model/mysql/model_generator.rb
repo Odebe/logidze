@@ -38,7 +38,7 @@ module Logidze
           desc: "Specify path to the model file"
 
         class_option :timestamp_column, type: :string, optional: true,
-          desc: "Specify timestamp column"
+          desc: "Not implemented for MySQL"
 
         class_option :name, type: :string, optional: true,
           desc: "Migration name"
@@ -62,6 +62,11 @@ module Logidze
 
           if options[:debounce_time]
             warn "--debounce_time is not implemented for MySQL"
+            exit(1)
+          end
+
+          if options[:timestamp_column]
+            warn "--timestamp_column is not implemented for MySQL"
             exit(1)
           end
 
