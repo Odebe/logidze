@@ -10,7 +10,7 @@ module Logidze
             config =
               if base.respond_to?(:connection_db_config)
                 # 6.1 <= Rails
-                base.connection_db_config[:config]
+                base.connection_db_config.then { |conf| conf.try(:config) || conf[:config] }
               elsif base.respond_to?(:configurations)
                 # 4.1.8 <= Rails < 6.1
                 base.configurations[Rails.env]
