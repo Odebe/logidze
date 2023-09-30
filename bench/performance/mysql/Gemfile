@@ -1,0 +1,15 @@
+# frozen_string_literal: true
+
+source "https://rubygems.org"
+
+gem "rails", "~> 6.0"
+gem "mysql2"
+
+gem "paper_trail", "~> 12.0"
+gem "logidze", path: "../../.."
+gem "fx"
+
+gem "faker"
+
+gem "memory_profiler"
+gem "benchmark-ips"

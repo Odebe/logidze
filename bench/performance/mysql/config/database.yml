@@ -1,0 +1,6 @@
+development:
+  adapter: mysql2
+  encoding: utf8
+  url: <%= ENV['DATABASE_URL'] %>
+  pool: 5
+  database: logidze_perf_bench
