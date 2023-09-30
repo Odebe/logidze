@@ -3,8 +3,8 @@
 require "spec_helper"
 require "generators/logidze/model/model_generator"
 
-describe Logidze::Generators::ModelGenerator, type: :generator do
-  destination File.expand_path("../../tmp", __dir__)
+describe Logidze::Generators::ModelGenerator, type: :generator, database: :mysql do
+  destination File.expand_path("../../../tmp", __dir__)
 
   let(:use_fx_args) { USE_FX ? [] : ["--fx"] }
   let(:fx_args) { USE_FX ? ["--no-fx"] : [] }
@@ -17,8 +17,16 @@ describe Logidze::Generators::ModelGenerator, type: :generator do
   end
 
   let(:base_args) { ["--no-after-trigger"] }
-  let(:args) { base_args + fx_args }
+  let(:required_args) { %w[--only=name age active] }
+  let(:args) { base_args + fx_args + required_args }
   let(:ar_version) { "6.0" }
+
+  let(:trigger_list) do
+    %W[
+      logidze_before_insert_on_#{full_table_name("users")}
+      logidze_before_update_on_#{full_table_name("users")}
+    ]
+  end
 
   before do
     prepare_destination
@@ -36,7 +44,7 @@ describe Logidze::Generators::ModelGenerator, type: :generator do
       end
 
       let(:path) { File.join(destination_root, "app", "models", "user.rb") }
-      let(:base_args) { ["user", "--no-after-trigger"] }
+      let(:base_args) { %w[user --no-after-trigger] }
 
       before do
         File.write(
@@ -51,11 +59,17 @@ describe Logidze::Generators::ModelGenerator, type: :generator do
       it "creates migration", :aggregate_failures do
         is_expected.to exist
         is_expected.to contain "ActiveRecord::Migration[#{ar_version}]"
-        is_expected.to contain "add_column :users, :log_data, :jsonb"
-        is_expected.to contain(/create trigger "logidze_on_#{full_table_name("users")}"/i)
-        is_expected.to contain(/before update or insert on "#{full_table_name("users")}" for each row/i)
-        is_expected.to contain(/execute procedure logidze_logger\(null, 'updated_at'\);/i)
-        is_expected.to contain(/drop trigger if exists "logidze_on_#{full_table_name("users")}" on "#{full_table_name("users")}"/i)
+        is_expected.to contain "add_column :users, :log_data, :json"
+
+        trigger_list.each do |trigger_name|
+          is_expected.to contain(/create trigger `#{trigger_name}`/i)
+          is_expected.to contain(/drop trigger if exists `#{trigger_name}`/i)
+        end
+
+        is_expected.to contain("JSON_ARRAY('name', 'age', 'active', 'log_data')")
+        is_expected.to contain("SET log_data = logidze_logger(old_j, new_j, columns_j, 'INSERT', NULL);")
+        is_expected.to contain("SET log_data = logidze_logger(old_j, new_j, columns_j, 'UPDATE', NULL);")
+
         is_expected.not_to contain(/update "#{full_table_name("users")}"/i)
 
         expect(file("app/models/user.rb")).to contain "has_logidze"
@@ -66,12 +80,16 @@ describe Logidze::Generators::ModelGenerator, type: :generator do
 
         it "creates migration", :aggregate_failures do
           is_expected.to exist
-          is_expected.to contain("create_trigger :logidze_on_users, on: :users")
+          trigger_list.each do |trigger_name|
+            is_expected.to contain(/create_trigger :#{trigger_name}/i)
+          end
         end
 
         it "creates a trigger file" do
           is_expected.to exist
-          expect(file("db/triggers/logidze_on_users_v01.sql")).to exist
+          trigger_list.each do |trigger_name|
+            expect(file("db/triggers/#{trigger_name}_v01.sql")).to exist
+          end
         end
       end
 
@@ -80,38 +98,10 @@ describe Logidze::Generators::ModelGenerator, type: :generator do
 
         it "creates trigger with limit" do
           is_expected.to exist
-          is_expected.to contain(/execute procedure logidze_logger\(5, 'updated_at'\);/i)
-        end
-      end
 
-      context "with debounce_time" do
-        let(:base_args) { ["user", "--debounce_time=5000", "--no-after-trigger"] }
-
-        it "creates trigger with debounce_time" do
-          is_expected.to exist
-          is_expected.to contain(/execute procedure logidze_logger\(null, 'updated_at', null, null, 5000\);/i)
-        end
-      end
-
-      context "with except" do
-        let(:base_args) { ["user", "--except", "age", "active", "--no-after-trigger"] }
-
-        it "creates trigger with columns exclusion" do
-          is_expected.to exist
-          is_expected.to contain(
-            /execute procedure logidze_logger\(null, 'updated_at', '\{age, active\}'\);/i
-          )
-        end
-      end
-
-      context "with only" do
-        let(:base_args) { ["user", "--only", "age", "active", "--no-after-trigger"] }
-
-        it "creates trigger with columns inclusion" do
-          is_expected.to exist
-          is_expected.to contain(
-            /execute procedure logidze_logger\(null, 'updated_at', '\{age, active\}', true\);/i
-          )
+          is_expected.to contain("JSON_ARRAY('name', 'age', 'active', 'log_data')")
+          is_expected.to contain("SET log_data = logidze_logger(old_j, new_j, columns_j, 'INSERT', 5);")
+          is_expected.to contain("SET log_data = logidze_logger(old_j, new_j, columns_j, 'UPDATE', 5);")
         end
       end
 
@@ -120,8 +110,8 @@ describe Logidze::Generators::ModelGenerator, type: :generator do
 
         it "creates backfill query" do
           is_expected.to exist
-          is_expected.to contain(/update "#{full_table_name("users")}" as t/i)
-          is_expected.to contain(/set log_data = logidze_snapshot\(to_jsonb\(t\), 'updated_at'\);/i)
+          is_expected.to contain(/update `#{full_table_name("users")}` as t/i)
+          is_expected.to contain(/SET log_data = logidze_snapshot/i)
         end
       end
 
@@ -130,11 +120,17 @@ describe Logidze::Generators::ModelGenerator, type: :generator do
 
         it "creates migration with trigger" do
           is_expected.to exist
-          is_expected.not_to contain "add_column :users, :log_data, :jsonb"
-          is_expected.to contain(/create trigger "logidze_on_#{full_table_name("users")}"/i)
-          is_expected.to contain(/before update or insert on "#{full_table_name("users")}" for each row/i)
-          is_expected.to contain(/execute procedure logidze_logger\(null, 'updated_at'\);/i)
-          is_expected.to contain(/drop trigger if exists "logidze_on_#{full_table_name("users")}" on "#{full_table_name("users")}"/i)
+          is_expected.not_to contain "add_column :users, :log_data, :json"
+
+          trigger_list.each do |trigger_name|
+            is_expected.to contain(/create trigger `#{trigger_name}`/i)
+            is_expected.to contain(/drop trigger if exists `#{trigger_name}`/i)
+          end
+
+          is_expected.to contain("JSON_ARRAY('name', 'age', 'active', 'log_data')")
+          is_expected.to contain("SET log_data = logidze_logger(old_j, new_j, columns_j, 'INSERT', NULL);")
+          is_expected.to contain("SET log_data = logidze_logger(old_j, new_j, columns_j, 'UPDATE', NULL);")
+
           is_expected.not_to contain "remove_column :users, :log_data"
         end
       end
@@ -149,10 +145,11 @@ describe Logidze::Generators::ModelGenerator, type: :generator do
 
         it "creates migration with drop and create trigger" do
           is_expected.to exist
-          is_expected.not_to contain "add_column :users, :log_data, :jsonb"
-          is_expected.to contain(/drop trigger if exists "logidze_on_#{full_table_name("users")}" on "#{full_table_name("users")}"/i)
-          is_expected.to contain(/before update or insert on "#{full_table_name("users")}" for each row/i)
-          is_expected.to contain "raise ActiveRecord::IrreversibleMigration"
+          is_expected.not_to contain "add_column :users, :log_data, :json"
+
+          trigger_list.each do |trigger_name|
+            is_expected.to contain(/drop trigger if exists `#{trigger_name}`/i)
+          end
         end
 
         context "with fx" do
@@ -170,12 +167,16 @@ describe Logidze::Generators::ModelGenerator, type: :generator do
 
           it "creates migration", :aggregate_failures do
             is_expected.to exist
-            is_expected.to contain("update_trigger :logidze_on_users, on: :users, version: 2, revert_to_version: 1")
+            trigger_list.each do |trigger_name|
+              is_expected.to contain("update_trigger :#{trigger_name}, on: :users, version: 2, revert_to_version: 1")
+            end
           end
 
           it "creates a trigger file" do
             is_expected.to exist
-            expect(file("db/triggers/logidze_on_users_v02.sql")).to exist
+            trigger_list.each do |trigger_name|
+              expect(file("db/triggers/#{trigger_name}_v02.sql")).to exist
+            end
           end
         end
 
@@ -190,51 +191,7 @@ describe Logidze::Generators::ModelGenerator, type: :generator do
 
           it "creates migration", :aggregate_failures do
             is_expected.to exist
-            is_expected.to contain "add_column :users, :log_data, :jsonb"
-          end
-        end
-      end
-
-      context "with timestamp_column" do
-        context "custom column name" do
-          let(:base_args) { ["user", "--timestamp_column", "time", "--no-after-trigger"] }
-
-          it "creates trigger with 'time' timestamp column" do
-            is_expected.to exist
-            is_expected.to contain(
-              /execute procedure logidze_logger\(null, 'time'\);/i
-            )
-          end
-        end
-
-        context "nil" do
-          let(:base_args) { ["user", "--timestamp_column", "nil", "--no-after-trigger"] }
-
-          it "creates trigger without timestamp column" do
-            is_expected.to exist
-            is_expected.to contain(
-              /execute procedure logidze_logger\(\);/i
-            )
-          end
-        end
-      end
-
-      context "with trigger type" do
-        let(:base_args) { ["user", "--after-trigger"] }
-
-        it "use after trigger" do
-          is_expected.to exist
-          is_expected.to contain(/after update or insert on "#{full_table_name("users")}" for each row/i)
-          is_expected.to contain(/execute procedure logidze_logger_after\(null, 'updated_at'\);/i)
-        end
-
-        context "with fx" do
-          let(:fx_args) { use_fx_args }
-
-          it "generates after trigger" do
-            is_expected.to exist
-            expect(file("db/triggers/logidze_on_users_v01.sql")).to exist
-            expect(file("db/triggers/logidze_on_users_v01.sql")).to contain(/after update or insert on/i)
+            is_expected.to contain "add_column :users, :log_data, :json"
           end
         end
       end
@@ -262,7 +219,7 @@ describe Logidze::Generators::ModelGenerator, type: :generator do
 
       it "creates migration", :aggregate_failures do
         is_expected.to exist
-        is_expected.to contain "add_column :user_guests, :log_data, :jsonb"
+        is_expected.to contain "add_column :user_guests, :log_data, :json"
 
         expect(file("app/models/user/guest.rb")).to contain "has_logidze"
       end
@@ -283,14 +240,14 @@ describe Logidze::Generators::ModelGenerator, type: :generator do
               class Set < ActiveRecord::Base
               end
             end
-          RAW
+        RAW
         )
         run_generator(args)
       end
 
       it "creates migration", :aggregate_failures do
         is_expected.to exist
-        is_expected.to contain "add_column :data_sets, :log_data, :jsonb"
+        is_expected.to contain "add_column :data_sets, :log_data, :json"
 
         expect(file("app/models/custom/data/set.rb")).to contain "has_logidze"
       end

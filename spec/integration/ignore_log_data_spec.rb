@@ -8,8 +8,14 @@ describe "ignore log columns", :db do
 
   before(:all) do
     Dir.chdir("#{File.dirname(__FILE__)}/../dummy") do
-      successfully "rails generate logidze:model post"
-      successfully "rails generate logidze:model post_comment"
+      if mysql?
+        successfully "rails generate logidze:model post --only=title rating data active"
+        successfully "rails generate logidze:model post_comment --only=content"
+      else
+        successfully "rails generate logidze:model post"
+        successfully "rails generate logidze:model post_comment"
+      end
+
       successfully "rake db:migrate"
 
       # Close active connections to handle db variables

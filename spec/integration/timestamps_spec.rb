@@ -2,7 +2,7 @@
 
 require "acceptance_helper"
 
-describe "log timestamps", :db do
+describe "log timestamps", :db, database: :postgresql do
   before do
     Timecop.freeze(Time.at(1_000_000)) do
       post.update!(rating: 100)

@@ -7,6 +7,67 @@ on:
   pull_request:
 
 jobs:
+  rspec_mysql:
+    runs-on: ubuntu-latest
+    env:
+      BUNDLE_JOBS: 4
+      BUNDLE_RETRY: 3
+      CI: true
+      RAILS_ENV: test
+      MYSQL_URL: mysql2://rails:rails@127.0.0.1:3306
+      DB: mysql
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby: [ "3.1" ]
+        mysql: [ "8", "5.7" ]
+        gemfile: [
+          "gemfiles/rails7.gemfile"
+        ]
+        include:
+          - ruby: "3.2"
+            gemfile: "gemfiles/railsmaster.gemfile"
+            mysql: "8"
+          - ruby: "2.7"
+            gemfile: "gemfiles/rails6.gemfile"
+            mysql: "8"
+          - ruby: "2.7"
+            gemfile: "gemfiles/rails6.gemfile"
+            mysql: "5.7"
+    services:
+      mysql:
+        image: mysql:${{ matrix.mysql }}
+        ports: ["3306:3306"]
+        env:
+          MYSQL_PASSWORD: rails
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: logidze_test
+          MYSQL_USER: rails
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s 
+          --health-retries=5
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install system deps
+        run: |
+          sudo apt-get update
+          sudo apt-get -yqq install libmysqlclient-dev
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+      - name: Prepare test database user
+        run: |
+          mysql -h0.0.0.0 -uroot -proot -e "GRANT SUPER ON *.* TO rails; FLUSH PRIVILEGES;"
+      - name: Run RSpec (unit, integrations)
+        run: |
+          bundle exec rspec --exclude-pattern=spec/acceptance/**/* -f d --force-color
+      - name: Run RSpec (acceptance)
+        run: |
+          bundle exec rspec spec/acceptance/ -f d --force-color
+
   rspec:
     runs-on: ubuntu-latest
     env:
@@ -14,7 +75,8 @@ jobs:
       BUNDLE_RETRY: 3
       CI: true
       RAILS_ENV: test
-      DATABASE_URL: postgres://postgres:postgres@localhost:5432
+      POSTGRESQL_URL: postgres://postgres:postgres@0.0.0.0:5432
+      DB: postgresql
     strategy:
       fail-fast: false
       matrix:

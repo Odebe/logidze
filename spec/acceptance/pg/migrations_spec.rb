@@ -2,14 +2,14 @@
 
 require "acceptance_helper"
 
-describe "Logidze migrations" do
+describe "Logidze migrations", database: :postgresql do
   describe "#install" do
     let(:check_logidze_command) { "ActiveRecord::Base.connection.execute %q{select logidze_version(1, '{}'::jsonb, statement_timestamp())}" }
 
     include_context "cleanup migrations"
 
     after(:all) do
-      Dir.chdir("#{File.dirname(__FILE__)}/../dummy") do
+      Dir.chdir("#{File.dirname(__FILE__)}/../../dummy") do
         successfully "rake db:migrate"
       end
     end

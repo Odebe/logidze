@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require_relative "function_definitions"
 require_relative "pending_migration_error"
 
 module Logidze
@@ -37,20 +36,23 @@ module Logidze
                "and apply generated migration." \
                "\n**************************************************\n\n"
         when :raise
-          raise Logidze::Utils::PendingMigrationError, "Logidze needs upgrade. Run `bundle exec rails generate logidze:install --update` and apply generated migration."
+          raise \
+            Logidze::Utils::PendingMigrationError, \
+            "Logidze needs upgrade. Run `bundle exec rails generate logidze:install --update` and apply generated migration."
         end
       end
 
       def needs_migration?
-        (library_function_versions - pg_function_versions).any?
+        (library_function_versions - database_function_versions).any?
       end
 
-      def pg_function_versions
-        Logidze::Utils::FunctionDefinitions.from_db.map { |func| [func.name, func.version] }
+      def database_function_versions
+        Logidze::Implementation::Current::FunctionDefinitions.from_db.map { |func| [func.name, func.version] }
       end
 
       def library_function_versions
-        @library_function_versions ||= Logidze::Utils::FunctionDefinitions.from_fs.map { |func| [func.name, func.version] }
+        @library_function_versions ||=
+          Logidze::Implementation::Current::FunctionDefinitions.from_fs.map { |func| [func.name, func.version] }
       end
     end
   end

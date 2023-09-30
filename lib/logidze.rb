@@ -5,14 +5,19 @@ require "logidze/version"
 # Logidze provides tools for adding in-table JSON-based audit to DB tables
 # and ActiveRecord extensions to work with changes history.
 module Logidze
+  require "logidze/error"
+  require "logidze/implementation"
   require "logidze/history"
   require "logidze/model"
   require "logidze/versioned_association"
   require "logidze/ignore_log_data"
   require "logidze/has_logidze"
+
+  require "logidze/setting"
   require "logidze/meta"
 
-  extend Logidze::Meta
+  extend Setting
+  extend Meta
 
   require "logidze/engine" if defined?(Rails)
 
@@ -49,17 +54,6 @@ module Logidze
         raise ArgumentError, "Unknown on_pending_upgrade option `#{mode.inspect}`. Expecting :raise, :warn or :ignore"
       end
       @on_pending_upgrade = mode
-    end
-
-    private
-
-    def with_logidze_setting(name, value)
-      ActiveRecord::Base.transaction do
-        ActiveRecord::Base.connection.execute "SET LOCAL #{name} TO #{value};"
-        res = yield
-        ActiveRecord::Base.connection.execute "SET LOCAL #{name} TO DEFAULT;"
-        res
-      end
     end
   end
 

@@ -20,8 +20,8 @@ module ConditionalDatabaseReset
 
     def watched_files_patterns
       [
-        File.join(__dir__, "..", "lib/generators/logidze/install/functions/*.sql"),
-        File.join(__dir__, "..", "lib/generators/logidze/install/templates/*")
+        File.join(__dir__, "../../..", "generators/logidze/install/#{ENV["DB"]}/functions/*.sql"),
+        File.join(__dir__, "../../..", "generators/logidze/install/#{ENV["DB"]}/templates/*")
       ]
     end
 

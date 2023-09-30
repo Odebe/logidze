@@ -1,0 +1,6 @@
+test:
+  adapter: mysql2
+  encoding: utf8
+  url: <%= ENV['MYSQL_URL'].presence || ENV['DATABASE_URL'] %>
+  pool: 5
+  database: logidze_test

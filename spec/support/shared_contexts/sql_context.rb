@@ -6,7 +6,8 @@ module Logidze
     # Perform SQL query and return the results
     def sql(query)
       result = ::ActiveRecord::Base.connection.execute query
-      result.values.first&.first
+      values = result.respond_to?(:values) ? result.values : result
+      values.first&.first
     end
   end
 end

@@ -2,6 +2,17 @@
 
 ENV["RAILS_ENV"] = "test"
 
+ENV["DB"] ||= ENV.fetch("DATABASE_URL").split(":").first
+ENV["DB"] =
+  case ENV["DB"]
+  when "mysql2", "trilogy"
+    "mysql"
+  when "postgres"
+    "postgresql"
+  else
+    ENV["DB"]
+  end
+
 begin
   require "debug" unless ENV["CI"] == "true"
 rescue LoadError # rubocop:disable Lint/HandleExceptions
@@ -19,6 +30,8 @@ RSpec.configure do |config|
     mocks.verify_partial_doubles = true
   end
 
+  config.filter_run_excluding database: ->(name) { name.to_s != ENV["DB"] }
+
   config.example_status_persistence_file_path = "tmp/rspec_examples.txt"
   config.filter_run :focus
   config.run_all_when_everything_filtered = true
@@ -31,6 +44,7 @@ RSpec.configure do |config|
   end
 
   config.include Logidze::TestHelpers
+  config.include Logidze::DbSelectionHelpers
 
   config.before(:each, db: true) do
     ActiveRecord::Base.connection.begin_transaction(joinable: false)

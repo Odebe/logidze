@@ -7,6 +7,10 @@ module Logidze
   class Engine < Rails::Engine # :nodoc:
     config.logidze = Logidze
 
+    initializer "load Logidze implementation for database adapter" do |_app|
+      require "logidze/implementation/current"
+    end
+
     initializer "extend ActiveRecord with Logidze" do |_app|
       ActiveSupport.on_load(:active_record) do
         ActiveRecord::Base.send :include, Logidze::HasLogidze

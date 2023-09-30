@@ -2,6 +2,15 @@
 
 require File.expand_path("../boot", __FILE__)
 
+require "fileutils"
+
+Dir.chdir(File.dirname(__FILE__)) do
+  FileUtils.cp(
+    "./database.#{ENV["DB"]}.yml",
+    "./database.yml"
+  )
+end
+
 require "rails"
 require "action_controller/railtie"
 require "active_record/railtie"
@@ -28,11 +37,16 @@ end
 if AFTER_TRIGGER
   require "generators/logidze/model/model_generator"
 
-  Logidze::Generators::ModelGenerator.class_eval do
-    def after_trigger?
-      return options[:after_trigger] unless options[:after_trigger].nil?
+  [
+    Logidze::Generators::Pg::ModelGenerator,
+    Logidze::Generators::Mysql::ModelGenerator
+  ].each do |generator|
+    generator.class_eval do
+      def after_trigger?
+        return options[:after_trigger] unless options[:after_trigger].nil?
 
-      true
+        true
+      end
     end
   end
 end
@@ -40,6 +54,8 @@ end
 module Dummy
   class Application < Rails::Application
     config.eager_load = false
+
+    config.autoload_paths += Dir["db/concerns/**/"]
 
     if TABLE_NAME_PREFIX
       $stdout.puts "🔩 Using table_name_prefix = '#{TABLE_NAME_PREFIX}'"

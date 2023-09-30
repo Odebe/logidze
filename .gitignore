@@ -37,6 +37,8 @@ spec/dummy/db/triggers/
 spec/dummy/db/migrate/*_enable_hstore.rb
 spec/dummy/db/migrate/*_logidze_install.rb
 
+spec/dummy/config/database.yml
+
 Gemfile.lock
 Gemfile.local
 .rspec
