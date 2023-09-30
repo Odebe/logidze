@@ -176,7 +176,7 @@ module Logidze
             [
               "old_j",
               "new_j",
-              columns_json,
+              'columns_j',
               escape_string(trigger_type),
               limit.presence || "NULL"
             ].compact.join(", ")

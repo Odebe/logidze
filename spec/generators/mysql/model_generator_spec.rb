@@ -66,9 +66,9 @@ describe Logidze::Generators::ModelGenerator, type: :generator, database: :mysql
           is_expected.to contain(/drop trigger if exists `#{trigger_name}`/i)
         end
 
-        columns = "JSON_ARRAY('name', 'age', 'active', 'log_data')"
-        is_expected.to contain("SET log_data = logidze_logger(old_j, new_j, #{columns}, 'INSERT', NULL);")
-        is_expected.to contain("SET log_data = logidze_logger(old_j, new_j, #{columns}, 'UPDATE', NULL);")
+        is_expected.to contain("JSON_ARRAY('name', 'age', 'active', 'log_data')")
+        is_expected.to contain("SET log_data = logidze_logger(old_j, new_j, columns_j, 'INSERT', NULL);")
+        is_expected.to contain("SET log_data = logidze_logger(old_j, new_j, columns_j, 'UPDATE', NULL);")
 
         is_expected.not_to contain(/update "#{full_table_name("users")}"/i)
 
@@ -99,9 +99,9 @@ describe Logidze::Generators::ModelGenerator, type: :generator, database: :mysql
         it "creates trigger with limit" do
           is_expected.to exist
 
-          columns = "JSON_ARRAY('name', 'age', 'active', 'log_data')"
-          is_expected.to contain("SET log_data = logidze_logger(old_j, new_j, #{columns}, 'INSERT', 5);")
-          is_expected.to contain("SET log_data = logidze_logger(old_j, new_j, #{columns}, 'UPDATE', 5);")
+          is_expected.to contain("JSON_ARRAY('name', 'age', 'active', 'log_data')")
+          is_expected.to contain("SET log_data = logidze_logger(old_j, new_j, columns_j, 'INSERT', 5);")
+          is_expected.to contain("SET log_data = logidze_logger(old_j, new_j, columns_j, 'UPDATE', 5);")
         end
       end
 
@@ -127,9 +127,9 @@ describe Logidze::Generators::ModelGenerator, type: :generator, database: :mysql
             is_expected.to contain(/drop trigger if exists `#{trigger_name}`/i)
           end
 
-          columns = "JSON_ARRAY('name', 'age', 'active', 'log_data')"
-          is_expected.to contain("SET log_data = logidze_logger(old_j, new_j, #{columns}, 'INSERT', NULL);")
-          is_expected.to contain("SET log_data = logidze_logger(old_j, new_j, #{columns}, 'UPDATE', NULL);")
+          is_expected.to contain("JSON_ARRAY('name', 'age', 'active', 'log_data')")
+          is_expected.to contain("SET log_data = logidze_logger(old_j, new_j, columns_j, 'INSERT', NULL);")
+          is_expected.to contain("SET log_data = logidze_logger(old_j, new_j, columns_j, 'UPDATE', NULL);")
 
           is_expected.not_to contain "remove_column :users, :log_data"
         end
